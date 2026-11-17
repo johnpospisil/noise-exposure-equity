@@ -6,7 +6,7 @@ One section per source: URL, retrieval date, version, size, licence, citation an
 |---|---|---|
 | BTS National Transportation Noise Map | Public domain (U.S. government), CC0 | ⚠️ Download page blocks scripts; zip URLs must be copied from a browser |
 | ACS 5-year (Census API) | Public domain | ✅ |
-| 2020 Decennial P.L. 94-171 block population (Census API) | Public domain | ✅ |
+| 2020 Decennial block population (TIGER `POP20`) | Public domain | ✅ |
 | TIGER/Line + CBSA delineations | Public domain | ✅ |
 | IPUMS NHGIS crosswalks | **IPUMS NHGIS terms: no redistribution; citation required** | ✅ (login required, as expected); possibly not needed (see §5) |
 | NYC 311 noise complaints | NYC Open Data terms of use | ✅ |
@@ -73,14 +73,28 @@ One section per source: URL, retrieval date, version, size, licence, citation an
 - **Geography (†checked on Manhattan block groups):** vintages ≤ 2019 use **2010** block groups (1,170 in New York County); vintages **≥ 2020 use 2020 block groups** (1,292). So the 2016–2020 ACS is already on 2020 boundaries.
 - **Test call:** B19013, B03002, B25003, B01003 at block-group level returned HTTP 200 for 2018, 2022 and 2024. Suppressed values come back as `-666666666` (must be set to null).
 - **Tables:** B19013 (median household income), B03002 (Hispanic origin by race), B25003 (tenure), B01001 (sex by age), B01003 (total population), plus MOE columns (`…M`).
+- **Ingested (P04, `ne.ingest.acs`):** vintages **2016–2020** and **2018–2022**, all block groups in the 20 metros' counties: `data/processed/acs_bg.parquet` (170,784 rows = 85,392 BGs × 2, 14.5 MB; matches TIGER exactly). Raw responses cached in `data/raw/census/acs/`.
+- **Quality (†):**
+
+| | 2016–2020 | 2018–2022 |
+|---|---|---|
+| Block groups | 85,392 | 85,392 |
+| Zero population | 1,268 | 1,225 |
+| Population | 123.9 M | 125.6 M |
+| Income missing (BGs / share of population) | 6,271 / 4.4% | 6,820 / 4.8% |
+| Income CV > 0.30 (BGs / share of population) | 18,771 / 19.7% | 19,756 / 20.9% |
+| Median income CV | 0.196 | 0.203 |
+| Income top-coded at $250,001 | 943 | 1,885 |
+
+  Flagged, not dropped (`income_missing`, `income_cv_high`); P15 drops them as a robustness check. Income is in each vintage's own dollars (2020 vs 2022); adjust before comparing levels across vintages.
 - **Size:** ~0.5 GB as JSON for all states × two vintages; < 100 MB as Parquet.
 - **Licence:** public domain. **Citation:** U.S. Census Bureau, American Community Survey 5-Year Estimates, {period}, via the Census Data API.
 
 ## 3. 2020 Decennial Census block population
 
-- **API:** `https://api.census.gov/data/2020/dec/pl` (P.L. 94-171), variable `P1_001N` at `block` level, called county by county.
-- **Test (†):** New York County returned 4,043 blocks.
-- **Size:** ~8.1 M blocks nationally; we only need the counties in the 20 metros. ~150 MB Parquet.
+- **Source used (P04):** the `POP20` field of the TIGER/Line 2020 block shapefiles (§4), which is the 2020 Census P.L. 94-171 count, so no separate API pull is needed. The API (`2020/dec/pl`, `P1_001N`) is used only to rank metros.
+- **Check (†):** block `POP20` summed by metro equals the 2020 Census population of every one of the 20 metros exactly (test `test_block_population_matches_metro_totals`).
+- **Ingested:** 1,593,667 blocks in the 20 metros, `data/interim/census/blocks_2020/{state}.parquet` (964 MB).
 - **Licence / citation:** public domain; U.S. Census Bureau, 2020 Census Redistricting Data (P.L. 94-171).
 
 ## 4. TIGER/Line boundaries and CBSA delineations
@@ -94,6 +108,10 @@ All under <https://www2.census.gov/geo/tiger/>, one zip per state (56 files). �
 | `TIGER2020/TABBLOCK20/` blocks 2020 | **10.34 GB** (download only the states in our metros) |
 | `TIGER2018/BG/` block groups 2010-vintage | 0.67 GB (only needed if NHGIS route is used) |
 | `TIGER2020/CBSA/tl_2020_us_cbsa.zip` | 33.1 MB |
+
+**Ingested (P04, `ne.ingest.tiger`):** metro counties only, GeoParquet in `data/interim/census/`: `bg_2020.parquet` 85,392 block groups (167 MB), `tract_2020.parquet` 30,134 tracts (98 MB), `blocks_2020/` 1,593,667 blocks in 22 states (964 MB; 5.19 GB of zips downloaded), `cbsa_2020.parquet` (3 MB).
+
+**Metro definitions:** we use the **March 2020** delineations (`list1_2020.xls`), not 2023, because they match 2020 block geography (2023 replaces Connecticut counties with planning regions). None of the 20 metros is in Connecticut.
 
 CBSA delineation file (county → CBSA): `…/metro-micro/geographies/reference-files/2023/delineation-files/list1_2023.xlsx` (†0.14 MB, July 2023 delineations). The 2020 version (`list1_2020.xls`) is also available. **Licence:** public domain. **Citation:** U.S. Census Bureau, TIGER/Line Shapefiles, 2020.
 

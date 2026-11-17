@@ -109,7 +109,7 @@ noise-exposure-equity/
   **Deliverables:** `data/raw/bts/` manifest (file, size, sha256), `gdalinfo` summary per layer, quick-look PNG of one metro per layer.
   **Questions:** Download all three years now, or 2020 first and older years later? Include AK/HI (spec is metro-focused, so default to CONUS only)?
 
-- [ ] **P04: Ingest Census (ACS, block population, TIGER, CBSA, crosswalks).**
+- [x] ✅ DONE! **P04: Ingest Census (ACS, block population, TIGER, CBSA, crosswalks).** _Done 2026-11-17: 20 metros (126.1 M people, 22 states) → 85,392 BGs, 30,134 tracts, 1.59 M blocks with POP20 matching census totals exactly; ACS 2016–20 + 2018–22; no NHGIS; 48 tests pass._
   `ingest/acs.py`, `ingest/tiger.py`: ACS 5-yr block-group tables for two vintages; 2020 P1 block population; TIGER block groups, blocks (state by state), tracts; CBSA delineation file; NHGIS 2010→2020 BG crosswalk. Derive variables: median household income, % non-Hispanic White / Black / Hispanic / Asian, % renters, population. Fill `config/metros.yaml` with the chosen metros.
   **Deliverables:** GeoParquet files + row counts; table of the selected metros with population; null/margin-of-error summary.
   **Questions:** Income quintiles within metro (spec) or national? How to handle block groups with high ACS margins of error (drop / flag / keep)?
@@ -213,5 +213,7 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17: NHGIS usage licence accepted (no redistribution; cite and add to bibliography). Plan: compute noise for every year on 2020 block groups so NHGIS is needed only for 2014–18 ACS; NHGIS files never leave `data/raw/nhgis/`.
 - 2026-11-17 (P03): **Homebrew GDAL 3.13** installed (`brew install gdal`), used only for `gdal_translate` (2022 FileGDB rasters) and `gdalbuildvrt` (display mosaics). Everything else uses rasterio's bundled GDAL. Scope is CONUS only (no AK/HI).
 - 2026-11-17 (P03): **Block-group noise metrics.** Area energy means are dominated by track/runway/lane cells where nobody lives (one 125 dB cell among 999 at 50 dB gives a 95 dB energy mean). So: (1) headline = **population share ≥ 55 / 65 dBA**; (2) typical level = **median dB per block, population-weighted to the block group** (not an energy mean over area); (3) energy sums only where physics needs them (combining sources at a cell, WHO ERFs in P14); (4) sensitivity: energy mean with values capped at 100 dB. Raw raster values are kept unchanged.
+- 2026-11-17 (P04): Metros = 20 largest MSAs by 2020 Census population, **OMB March 2020 delineations** (match 2020 block geography). Block population comes from TIGER `POP20` (no separate API pull).
+- 2026-11-17 (P04): **Income quintiles within each metro** (spec), built in P09. **ACS reliability: flag and keep** block groups with missing income or CV > 0.30 (`acs_cv_flag`); drop them as a P15 robustness check.
 - 2026-11-17 (P02): **2022 BTS map (released May 2026) is the main "current" year**, paired with ACS 2018–22. 2020 stays as a robustness check (COVID-era traffic). Change over time: 2016 → 2018 → 2022 (road + aviation).
 - 2026-11-17 (P02): **NHGIS dropped.** Earlier demographics come from ACS 2016–20, which is already on 2020 block groups, so no crosswalk is needed. Keep the NHGIS licence notes in case this is revisited.

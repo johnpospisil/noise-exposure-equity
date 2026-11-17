@@ -1,4 +1,155 @@
-# The 20 largest metropolitan statistical areas (CBSAs) by population.
-# Filled in by P04 from the Census CBSA delineation file and ACS population.
-# Each entry: { cbsa: "35620", name: "New York-Newark-Jersey City, NY-NJ", pop: 19_500_000 }
-metros: []
+# Study metros: the largest Metropolitan Statistical Areas by 2020 Census population,
+# OMB March 2020 delineations. Written by `python -m ne.ingest.tiger`; do not edit.
+metros:
+- rank: 1
+  cbsa: '35620'
+  short: New York
+  name: New York-Newark-Jersey City, NY-NJ-PA
+  pop2020: 20140470
+  states: ['34', '36', '42']
+  counties: ['34003', '34013', '34017', '34019', '34023', '34025', '34027', '34029',
+    '34031', '34035', '34037', '34039', '36005', '36047', '36059', '36061', '36079',
+    '36081', '36085', '36087', '36103', '36119', '42103']
+- rank: 2
+  cbsa: '31080'
+  short: Los Angeles
+  name: Los Angeles-Long Beach-Anaheim, CA
+  pop2020: 13200998
+  states: ['06']
+  counties: ['06037', 06059]
+- rank: 3
+  cbsa: '16980'
+  short: Chicago
+  name: Chicago-Naperville-Elgin, IL-IN-WI
+  pop2020: 9618502
+  states: ['17', '18', '55']
+  counties: ['17031', '17037', '17043', '17063', '17089', '17093', '17097', '17111',
+    '17197', '18073', '18089', '18111', '18127', '55059']
+- rank: 4
+  cbsa: '19100'
+  short: Dallas
+  name: Dallas-Fort Worth-Arlington, TX
+  pop2020: 7637387
+  states: ['48']
+  counties: ['48085', '48113', '48121', '48139', '48231', '48251', '48257', '48367',
+    '48397', '48439', '48497']
+- rank: 5
+  cbsa: '26420'
+  short: Houston
+  name: Houston-The Woodlands-Sugar Land, TX
+  pop2020: 7122240
+  states: ['48']
+  counties: ['48015', '48039', '48071', '48157', '48167', '48201', '48291', '48339',
+    '48473']
+- rank: 6
+  cbsa: '47900'
+  short: Washington
+  name: Washington-Arlington-Alexandria, DC-VA-MD-WV
+  pop2020: 6385162
+  states: ['11', '24', '51', '54']
+  counties: ['11001', '24009', '24017', '24021', '24031', '24033', '51013', '51043',
+    '51047', '51059', '51061', '51107', '51113', '51153', '51157', '51177', '51179',
+    '51187', '51510', '51600', '51610', '51630', '51683', '51685', '54037']
+- rank: 7
+  cbsa: '37980'
+  short: Philadelphia
+  name: Philadelphia-Camden-Wilmington, PA-NJ-DE-MD
+  pop2020: 6245051
+  states: ['10', '24', '34', '42']
+  counties: ['10003', '24015', '34005', '34007', '34015', '34033', '42017', '42029',
+    '42045', '42091', '42101']
+- rank: 8
+  cbsa: '33100'
+  short: Miami
+  name: Miami-Fort Lauderdale-Pompano Beach, FL
+  pop2020: 6138333
+  states: ['12']
+  counties: ['12011', '12086', '12099']
+- rank: 9
+  cbsa: '12060'
+  short: Atlanta
+  name: Atlanta-Sandy Springs-Alpharetta, GA
+  pop2020: 6089815
+  states: ['13']
+  counties: ['13013', '13015', '13035', '13045', '13057', '13063', '13067', '13077',
+    '13085', '13089', '13097', '13113', '13117', '13121', '13135', '13143', '13149',
+    '13151', '13159', '13171', '13199', '13211', '13217', '13223', '13227', '13231',
+    '13247', '13255', '13297']
+- rank: 10
+  cbsa: '14460'
+  short: Boston
+  name: Boston-Cambridge-Newton, MA-NH
+  pop2020: 4941632
+  states: ['25', '33']
+  counties: ['25009', '25017', '25021', '25023', '25025', '33015', '33017']
+- rank: 11
+  cbsa: '38060'
+  short: Phoenix
+  name: Phoenix-Mesa-Chandler, AZ
+  pop2020: 4845832
+  states: ['04']
+  counties: ['04013', '04021']
+- rank: 12
+  cbsa: '41860'
+  short: San Francisco
+  name: San Francisco-Oakland-Berkeley, CA
+  pop2020: 4749008
+  states: ['06']
+  counties: ['06001', '06013', '06041', '06075', 06081]
+- rank: 13
+  cbsa: '40140'
+  short: Riverside
+  name: Riverside-San Bernardino-Ontario, CA
+  pop2020: 4599839
+  states: ['06']
+  counties: ['06065', '06071']
+- rank: 14
+  cbsa: '19820'
+  short: Detroit
+  name: Detroit-Warren-Dearborn, MI
+  pop2020: 4392041
+  states: ['26']
+  counties: ['26087', '26093', '26099', '26125', '26147', '26163']
+- rank: 15
+  cbsa: '42660'
+  short: Seattle
+  name: Seattle-Tacoma-Bellevue, WA
+  pop2020: 4018762
+  states: ['53']
+  counties: ['53033', '53053', '53061']
+- rank: 16
+  cbsa: '33460'
+  short: Minneapolis
+  name: Minneapolis-St. Paul-Bloomington, MN-WI
+  pop2020: 3690261
+  states: ['27', '55']
+  counties: ['27003', '27019', '27025', '27037', '27053', '27059', '27079', '27095',
+    '27123', '27139', '27141', '27163', '27171', '55093', '55109']
+- rank: 17
+  cbsa: '41740'
+  short: San Diego
+  name: San Diego-Chula Vista-Carlsbad, CA
+  pop2020: 3298634
+  states: ['06']
+  counties: ['06073']
+- rank: 18
+  cbsa: '45300'
+  short: Tampa
+  name: Tampa-St. Petersburg-Clearwater, FL
+  pop2020: 3175275
+  states: ['12']
+  counties: ['12053', '12057', '12101', '12103']
+- rank: 19
+  cbsa: '19740'
+  short: Denver
+  name: Denver-Aurora-Lakewood, CO
+  pop2020: 2963821
+  states: [08]
+  counties: [08001, 08005, 08014, 08019, 08031, 08035, 08039, 08047, 08059, 08093]
+- rank: 20
+  cbsa: '12580'
+  short: Baltimore
+  name: Baltimore-Columbia-Towson, MD
+  pop2020: 2844510
+  states: ['24']
+  counties: ['24003', '24005', '24013', '24025', '24027', '24035', '24510']

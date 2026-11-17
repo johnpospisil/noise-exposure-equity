@@ -14,3 +14,8 @@ metric_offsets_db:
   road: { lden_offset: 3.0, lnight_offset: -7.0 }
   rail: { lden_offset: 3.0, lnight_offset: -7.0 }
   aviation: { lden_offset: 3.0, lnight_offset: -7.0 }
+
+# ACS reliability flag (P04): block groups are flagged, not dropped.
+# CV = (MOE / 1.645) / estimate. 0.30 is a common "use with caution" cut-off;
+# robustness checks (P15) drop flagged block groups.
+acs_cv_flag: 0.30

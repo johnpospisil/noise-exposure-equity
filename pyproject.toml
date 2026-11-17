@@ -35,6 +35,7 @@ dependencies = [
     "python-dotenv",
     "pyyaml",
     "tqdm",
+    "python-calamine>=0.9.1",
 ]
 
 [dependency-groups]
