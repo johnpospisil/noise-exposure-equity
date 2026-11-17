@@ -1,0 +1,31 @@
+# BTS National Transportation Noise Map: CONUS download URLs.
+# Copied 2026-11-17 from https://www.bts.gov/geospatial/national-transportation-noise-map
+# bts.gov returns HTTP 403 to scripted clients (checked 2026-11-17), so these zips are
+# downloaded in a browser into data/raw/bts/zips/ and ingest/bts_noise.py works from there.
+# Combined layers (road_and_aviation, rail_road_and_aviation) are listed for spot checks only;
+# the analysis builds combinations itself with an energy sum.
+
+base_url: https://www.bts.gov/bts-net-storage/
+local_dir: data/raw/bts/zips
+
+layers:
+  # year: {mode: file}
+  2016:
+    road: CONUS_road_noise_2016.zip
+    aviation: CONUS_aviation_noise_2016.zip
+  2018:
+    road: CONUS_road_noise_2018.zip
+    aviation: CONUS_aviation_noise_2018.zip
+    rail: CONUS_rail_noise_2018.zip            # passenger rail only, prototype
+  2020:
+    road: CONUS_road_noise_2020.zip
+    aviation: CONUS_aviation_noise_2020.zip
+    rail: CONUS_rail_noise_2020.zip            # freight + passenger, prototype
+  2022:
+    road: CONUS_road_noise_2022.zip            # road data year 2023 (HPMS)
+    aviation: CONUS_aviation_noise_2022.zip
+    rail: CONUS_rail_noise_2022.zip            # freight + passenger
+
+combined_optional:
+  2022: CONUS_rail_road_and_aviation_noise_2022.zip
+  2020: CONUS_rail_road_and_aviation_noise_2020.zip

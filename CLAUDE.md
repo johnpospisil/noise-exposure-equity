@@ -30,18 +30,18 @@ Sizes marked † were **measured live on 2026-11-17**. Sizes marked ~ are estima
 
 | # | Source | Where | Access | What we take | Raw size | After processing |
 |---|---|---|---|---|---|---|
-| 1 | **BTS National Transportation Noise Map**, 2016, 2018, 2020 | bts.gov/geospatial/national-transportation-noise-map (data from maps.dot.gov / NTAD); mirror at UW DEOHS (`edmundseto.com/NTNE_map`); DataLumos archive | Open, no key | CONUS layers: road, aviation, rail (2018 passenger rail only, prototype; 2020 freight + passenger), combined layers | ~2–10 GB zipped per CONUS layer; **~30–60 GB on disk** for all layers and years as COGs | Block-group table ~242k rows × years × sources, **< 100 MB** Parquet |
-| 2 | **ACS 5-year** (2014–18 for the 2016/2018 maps, 2018–22 for the 2020 map) | Census API (free key) or IPUMS NHGIS | Free key | B19013 income, B03002 race/ethnicity, B25003 tenure, B01001 age, population | ~0.5 GB | < 100 MB |
-| 3 | **2020 Decennial P1 block population** (weights inside block groups) | Census API / NHGIS | Free key | ~8.1M blocks, population | ~1 GB | ~150 MB Parquet |
-| 4 | **TIGER/Line**: block groups, blocks, tracts, CBSA delineations | census.gov TIGER | Open | Boundaries for 2010 and 2020 geographies | Blocks ~5–8 GB nationally (processed state by state); block groups ~1 GB | GeoParquet ~1–2 GB |
-| 5 | **NHGIS geographic crosswalks** (2010→2020 block groups) | nhgis.org | Free account | Needed to compare 2016/2018 with 2020 | < 1 GB | small |
-| 6 | **NYC 311**: `erm2-nwe9` (2020–present) + `76ig-c548` (2010–2019) | NYC Open Data (Socrata SODA API; optional free app token) | Open | Noise complaints only, ~12 columns | †erm2-nwe9 is 23.2M rows in total; **†5.26M noise rows (2020+) + †3.40M noise rows (2010–19) = ~8.7M rows**, ~1.5–2 GB as CSV | ~200–300 MB Parquet |
+| 1 | **BTS National Transportation Noise Map**, 2016, 2018, 2020, **2022 (new, released May 2026)** | bts.gov/geospatial/national-transportation-noise-map (blocks scripts: zip URLs copied once from a browser); docs v3 doi:10.21949/sysz-2y22; DataLumos archive (2020); UW DEOHS tract-level derivative (validation only) | Open, no key | 30 m FileGDB rasters, LAeq,24h, < 45 dB censored. CONUS road, aviation, rail (2018 passenger prototype; 2020 freight + passenger prototype; 2022 freight + passenger) | †2020 road zip ≈ 855 MB, rail ≈ 605 MB (DataLumos listing); ~0.3–1 GB zipped per layer → **~10–15 GB zipped, ~30–45 GB on disk** for road + aviation + rail × 4 years | Block-group table ~242k rows × years × sources, **< 100 MB** Parquet |
+| 2 | **ACS 5-year** (2014–18 for the 2016/2018 maps, 2018–22 for the 2020 map) | Census API (key in `.env`, †works) | Free key | B19013 income, B03002 race/ethnicity, B25003 tenure, B01001 age, population | †vintages 2009–2024 available (latest 2020–24); †≤ 2019 on 2010 BGs, ≥ 2020 on 2020 BGs; ~0.5 GB | < 100 MB |
+| 3 | **2020 Decennial P1 block population** (weights inside block groups) | Census API (`2020/dec/pl`, †works) | Free key | ~8.1M blocks, population | ~1 GB | ~150 MB Parquet |
+| 4 | **TIGER/Line**: block groups, blocks, tracts, CBSA delineations | census.gov TIGER | Open | Boundaries for 2010 and 2020 geographies | †2020 blocks 10.34 GB zipped nationally (only metro states needed); †2020 BGs 0.69 GB; †tracts 0.41 GB; †2018 BGs 0.67 GB; †CBSA 33 MB | GeoParquet ~1–2 GB |
+| 5 | **NHGIS geographic crosswalks** (2010→2020 block groups) | nhgis.org (†login-gated, as expected) | Free account | Only if 2014–18 ACS is used; ACS 2016–20 is already on 2020 BGs | < 1 GB | small |
+| 6 | **NYC 311**: `erm2-nwe9` (2020–present) + `76ig-c548` (2010–2019) | NYC Open Data (Socrata SODA API; app token in `.env`, †works) | Open | Noise complaints only, ~12 columns | **†5,259,406 noise rows (2020-01-01 → 2026-11-16) + †3,403,203 (2010–19) = 8.66M rows**; †0.5–0.7% missing coordinates; ~1.5–2 GB as CSV | ~200–300 MB Parquet |
 | 7 | **NYC gentrification typology** | Urban Displacement Project (tract) and/or NYU Furman Center; or our own ACS-based typology | Published / open | Tract change class | < 10 MB | < 10 MB |
 | 8 | **FAA Part 150 noise contours** | FAA / airport websites (JFK, LGA, EWR, ATL, LAX, ORD…) | Open, patchy | Validation polygons for a handful of airports | < 500 MB | small |
 | 9 | **WHO exposure-response functions** | WHO 2018 Environmental Noise Guidelines + Guski et al. 2017 (annoyance) and Basner & McGuire 2018 (sleep) systematic reviews | Published | Coefficients coded by hand into `who_erf.py` | — | — |
 | 10 | **EPA EJScreen (archived)** | Public Environmental Data Partners rebuild (v2.3), Yale mirror, Harvard EELP tracker, Wayback | Open mirrors | Optional: cross-check demographic and traffic-proximity indicators | ~2–3 GB | optional |
 
-**Total local disk to plan for: about 80–100 GB** (rasters dominate). Everything except the rasters fits in under 5 GB. Rasters are processed **one metro window at a time** from COGs, so RAM stays under ~8 GB.
+**Total local disk to plan for: about 50–70 GB** (revised in P02; rasters dominate). Everything except the rasters fits in under 5 GB. Rasters are processed **one metro window at a time** from COGs, so RAM stays under ~8 GB.
 
 ### Data caveats (fixed in the analysis design)
 - **Rail is not comparable over time.** 2016 has no rail, 2018 has passenger rail only (prototype), 2020 has freight + passenger. Change-over-time results are **road + aviation only**; rail is reported for 2020 only.
@@ -95,7 +95,7 @@ noise-exposure-equity/
   **Deliverables:** directory tree, `uv run pytest` passing (smoke test), `make help` output.
   **Questions:** git init and push to GitHub? Where should raw data live (internal disk vs external drive; ~100 GB needed)? Python 3.12 OK?
 
-- [ ] **P02: Data access check and DATA.md.**
+- [x] ✅ DONE! **P02: Data access check and DATA.md.** _Done 2026-11-17: DATA.md written; Census/TIGER/311/NHGIS/ERF sources pass; BTS adds a 2022 release, but its download page blocks scripts, so the zip URLs need copying from a browser._
   Probe every source in the inventory: confirm download URLs, **measure actual file sizes** (HTTP HEAD / listings), licences, and the latest ACS vintage. Check EJScreen mirror status. Get Census API key and Socrata token into `.env`. Write `DATA.md` with one section per source (URL, retrieval date, version, size, licence, citation, known issues). Update the inventory table in this file with measured sizes.
   **Deliverables:** `DATA.md`; corrected size table; a short "access check" report (✅ / ⚠️ per source).
   **Questions:** Use the 20 largest metros (spec) or all ~380 metro CBSAs (same code, ~5× compute)? Include EJScreen as a cross-check or skip it? Census API or NHGIS for ACS?
@@ -209,3 +209,5 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17: Census API key is in `.env`. NHGIS account being set up (used for crosswalks only). ACS tables come from the Census API.
 - 2026-11-17: **EJScreen skipped** (not used as a cross-check).
 - 2026-11-17: NHGIS usage licence accepted (no redistribution; cite and add to bibliography). Plan: compute noise for every year on 2020 block groups so NHGIS is needed only for 2014–18 ACS; NHGIS files never leave `data/raw/nhgis/`.
+- 2026-11-17 (P02): **2022 BTS map (released May 2026) is the main "current" year**, paired with ACS 2018–22. 2020 stays as a robustness check (COVID-era traffic). Change over time: 2016 → 2018 → 2022 (road + aviation).
+- 2026-11-17 (P02): **NHGIS dropped.** Earlier demographics come from ACS 2016–20, which is already on 2020 block groups, so no crosswalk is needed. Keep the NHGIS licence notes in case this is revisited.
