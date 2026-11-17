@@ -22,3 +22,7 @@ report/_freeze/
 
 # OS
 .DS_Store
+
+# NHGIS files must never be committed (licence: no redistribution)
+**/nhgis*
+*nhgis*.zip

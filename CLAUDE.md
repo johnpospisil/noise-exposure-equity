@@ -17,6 +17,7 @@
 4. Decibels are **never** averaged or added arithmetically. Use `ne.build.combine_sources` (energy sum: `10·log10(Σ 10^(L/10))`) and energy means.
 5. Every figure is made by code in `src/ne/viz/` and can be rebuilt with `make figures`.
 6. Conclusions apply to **neighbourhoods only** (ecological fallacy). Modelled noise is not measured noise; say so wherever results are reported.
+7. **Licences (see "Data licences" below).** NHGIS files are never committed, released, bundled into the app, or uploaded anywhere. Any table that reaches GitHub, a release or the app must say which sources it derives from.
 
 ### Stack
 Python 3.12 · `uv` · `rasterio` / `rioxarray` / GDAL · `exactextract` (zonal stats) · `geopandas` · `duckdb` + Parquet · `pysal` (`libpysal`, `spreg`, `esda`) · `statsmodels` (negative binomial) · `matplotlib` + `plotly` · Quarto for the report · `pytest` + `ruff`.
@@ -49,6 +50,19 @@ Sizes marked † were **measured live on 2026-11-17**. Sizes marked ~ are estima
 - BTS says the map "should not be used to evaluate noise levels in individual locations", so the address lookup must say this clearly.
 - The CONUS mosaic rasters need BTS's published **repair steps** before use (see P03).
 - The 2020 inputs reflect COVID-era traffic. Note this whenever 2018 and 2020 are compared.
+
+### Data licences
+
+| Source | Terms | What this means here |
+|---|---|---|
+| **IPUMS NHGIS** (crosswalks) | Agreed 2026-11-17. **(1) No redistribution without permission.** Publishing a subset needed for a particular publication's data-access requirements is allowed; anything else needs written permission from IPUMS. **(2) Cite NHGIS** as given on their citation-and-use page, and **add the publication to the NHGIS bibliography**. Breaking the terms can lead to loss of access and liability for damages. | NHGIS files stay in `data/raw/nhgis/` (git-ignored) and never go into commits, releases, the app or a public bucket. Published outputs are **our own aggregate results** (exposure shares, model estimates), never crosswalk weights or NHGIS extracts. Anyone reproducing the work downloads NHGIS files with their own account (`make ingest` explains how). The exact NHGIS citation goes in DATA.md, the report and the README. After publication, submit the article to the NHGIS bibliography (P19). |
+| **Census API** (ACS, Decennial, TIGER) | U.S. government work, public domain | Can be redistributed; cite the Census Bureau. Not covered by the NHGIS terms, which is why ACS comes from the API rather than NHGIS. |
+| **BTS Noise Map** | U.S. government work, public domain | Cite BTS. Keep BTS's caveat that the map should not be used to judge individual locations. |
+| **NYC Open Data (311)** | NYC Open Data terms of use (free reuse, attribution) | Cite NYC Open Data; publish tract-level counts only, never complaint-level records. |
+| **Gentrification typology** | Depends on source (P12) | Check its licence before use; cite it. |
+| **WHO / journal ERFs** | Coefficients from published papers | Cite each paper. |
+
+**Keep NHGIS usage small.** Noise is computed from the rasters directly on **2020 block groups for every release year**, so noise change over time needs no crosswalk. NHGIS crosswalks are needed only to bring **2014–18 ACS demographics** onto 2020 boundaries (P09). If that turns out not to be worth it, hold demographics at 2018–22 and drop NHGIS entirely.
 
 ---
 
@@ -121,7 +135,7 @@ noise-exposure-equity/
   **Questions:** Any metros with odd results to look into before modelling?
 
 - [ ] **P09: Analysis table.**
-  `build/analysis_table.py`: join noise + demographics + metro IDs; income quintiles within metro; 2010→2020 crosswalk so 2016/2018 can be compared with 2020 on 2020 boundaries. Data dictionary.
+  `build/analysis_table.py`: join noise + demographics + metro IDs; income quintiles within metro. Noise for all years is already on 2020 block groups (P07/P08). Use the NHGIS 2010→2020 crosswalk only to bring 2014–18 ACS onto 2020 boundaries; crosswalked outputs stay local (NHGIS licence). Data dictionary with a "derived from" column.
   **Deliverables:** `data/processed/analysis_bg.parquet`, data dictionary in DATA.md, descriptive summary table.
   **Questions:** Race/ethnicity groups to report (default: NH White, NH Black, Hispanic, NH Asian, other)?
 
@@ -169,7 +183,7 @@ noise-exposure-equity/
 ### Phase 6: Article, app, publish (Week 6)
 
 - [ ] **P17: Report / article.**
-  `report/index.qmd`: Quarto article built from processed data and figures; methods appendix; limitations ("what we won't claim"); reproducibility instructions. `make report`.
+  `report/index.qmd`: Quarto article built from processed data and figures; methods appendix; limitations ("what we won't claim"); data sources and citations section (NHGIS citation in its required form); reproducibility instructions (including getting your own NHGIS account). `make report`.
   **Deliverables:** rendered HTML report, word count, list of claims with the table/figure behind each one.
   **Questions:** Where will it be published (personal site, Medium, Substack, GitHub Pages)? Audience and tone?
 
@@ -179,7 +193,7 @@ noise-exposure-equity/
   **Questions:** Framework and hosting (static site + pre-computed tiles vs Streamlit / FastAPI)? Metros covered only, or national?
 
 - [ ] **P19: Final QA and publish.**
-  Run `make all` from a clean clone; validate key numbers (spot checks, a pinned-share test); README with headline findings; DATA.md citations; tag a release; distribution checklist (spec §9).
+  Run `make all` from a clean clone; validate key numbers (spot checks, a pinned-share test); README with headline findings; DATA.md citations; **licence audit** (no NHGIS files or crosswalk weights in git history, releases or the app; every published table names its sources; NHGIS citation in README, report and DATA.md); tag a release; **submit the article to the NHGIS bibliography**; distribution checklist (spec §9).
   **Deliverables:** clean-build log, QA checklist, release tag, distribution drafts.
   **Questions:** Ready to publish? Who to contact first?
 
@@ -192,3 +206,6 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17: Raw data lives on the internal disk under `data/raw/` (git-ignored).
 - 2026-11-17: Scope is the **20 largest metros** (CBSAs by population), as in the spec.
 - 2026-11-17: GitHub repo is **public**. Python 3.12. GDAL comes bundled with rasterio (no system GDAL needed); use `uv run rio info` instead of `gdalinfo`.
+- 2026-11-17: Census API key is in `.env`. NHGIS account being set up (used for crosswalks only). ACS tables come from the Census API.
+- 2026-11-17: **EJScreen skipped** (not used as a cross-check).
+- 2026-11-17: NHGIS usage licence accepted (no redistribution; cite and add to bibliography). Plan: compute noise for every year on 2020 block groups so NHGIS is needed only for 2014–18 ACS; NHGIS files never leave `data/raw/nhgis/`.
