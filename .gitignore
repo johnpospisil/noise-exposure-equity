@@ -26,3 +26,6 @@ report/_freeze/
 # NHGIS files must never be committed (licence: no redistribution)
 data/**/nhgis*
 /*nhgis*.zip
+
+# QA figures are rebuilt locally (make figures)
+figures/qa/

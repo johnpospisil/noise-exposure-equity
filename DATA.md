@@ -40,11 +40,23 @@ One section per source: URL, retrieval date, version, size, licence, citation an
 
 **Modelling assumptions that matter for us:** no shielding by barriers, buildings or terrain (over-predicts behind barriers and in dense cities); all ground treated as soft (under-predicts over water and pavement); only transportation sources. 2016 aviation excludes airports without PDARS radar tracks (Doc. Table 10-1). Road 2022 release uses 2023 HPMS because of HPMS v9 data-quality problems.
 
-**Size:** †Search-indexed DataLumos listing gives `CONUS_road_noise_2020.zip` ≈ 855 MB and `CONUS_rail_noise_2020.zip` ≈ 605 MB (not re-measured; DataLumos also blocks scripted access). ~Estimate: 0.3–1 GB zipped per CONUS layer per year → ~10–15 GB zipped for road + aviation + rail across 4 years, ~30–45 GB on disk after unzip + COG. Much less than the 30–60 GB first planned.
+**What the zips contain (P03, 2026-11-17):**
+
+- **2016, 2018, 2020:** `State_rasters/{ST}_{mode}_noise_{year}.tif` (LZW GeoTIFF, one per state; 48 + DC, 47 for 2018 rail) plus an ArcGIS mosaic dataset in a `.gdb`. We read the state GeoTIFFs directly, so **BTS's mosaic repair steps are not needed**.
+- **2022:** one File Geodatabase per layer holding a raster per state (`{ST}_{mode}_noise`). Read with GDAL's OpenFileGDB raster driver, which rasterio's bundled GDAL lacks; we use Homebrew GDAL 3.13.3 `gdal_translate` for this one step.
+- All layers: ESRI:102039 (USA Contiguous Albers Equal Area Conic, USGS, NAD83), 30 m, float32, values 45–125 dB. Nodata is −3.4e38 in 2016–2020 and +3.4e38 in 2022; our COGs use −9999.
+- Neighbouring state rasters never both hold a value in one cell. **Grids:** 2016–2020 road and 2018/2020 rail are snapped to multiples of 30 m; aviation (all years) and every 2022 layer have a different grid origin per state (0–30 m offsets, identical across modes in 2022). Analysis therefore reads each block group's own state raster; CONUS VRTs are for maps only.
+- **Upper tail:** rail and aviation reach ~125 dB (apparent model ceiling) on track lines and runways. Cells ≥ 100 dB: 0.017% of 2020 rail cells, 0.002% of 2020 aviation cells; road never exceeds ~97 dB.
+- **No subway.** The rail layers follow commuter and freight lines; NYC subway (including elevated lines) is not modelled.
+- 2018 road has ~9% fewer valid cells than 2016 or 2020 (110.9 M vs 124.2 M / 121.3 M); to be checked in P08.
+
+**Measured zip sizes (†, `data/raw/bts/manifest.csv` has sha256):** road 0.88 / 0.79 / 0.90 / 1.11 GB (2016/18/20/22); aviation 0.25 / 0.28 / 0.25 / 0.23 GB; rail – / 0.07 / 0.63 / 0.55 GB. **Total 5.47 GB zipped.** Uncompressed 46 GB (2022 road alone 26.8 GB, mostly empty FileGDB space), but nothing is unzipped: COGs are written straight from the zips. **COGs: 9.9 GB** in `data/interim/bts/cog/`.
+
+**Original estimate:** †Search-indexed DataLumos listing gives `CONUS_road_noise_2020.zip` ≈ 855 MB and `CONUS_rail_noise_2020.zip` ≈ 605 MB (not re-measured; DataLumos also blocks scripted access). ~Estimate: 0.3–1 GB zipped per CONUS layer per year → ~10–15 GB zipped for road + aviation + rail across 4 years, ~30–45 GB on disk after unzip + COG. Much less than the 30–60 GB first planned.
 
 **Access problem:** bts.gov and DataLumos return HTTP 403 to non-browser clients. Zip URLs were taken from a browser-saved copy of the page (2026-11-17) and recorded in `config/bts_sources.yaml`, in the pattern `https://www.bts.gov/bts-net-storage/CONUS_{mode}_noise_{year}.zip`. †The zip files themselves also return 403 to scripts, so they are **downloaded manually in a browser** into `data/raw/bts/zips/`; `ingest/bts_noise.py` (P03) verifies, checksums and converts them from there.
 
-**Mosaic repair:** BTS publishes repair steps for the 2016/2018 CONUS mosaics (broken paths to state rasters, ArcGIS-only tooling): <https://www.bts.gov/explore-topics-and-geography/geography/national-transportation-noise-map-repairing-continental-us>. The v3 repackaging into FileGDB may make this moot; P03 checks. If not, we read the state-level rasters directly instead of the mosaic.
+**Mosaic repair:** BTS publishes repair steps for the 2016/2018 CONUS mosaics (broken paths to state rasters, ArcGIS-only tooling): <https://www.bts.gov/explore-topics-and-geography/geography/national-transportation-noise-map-repairing-continental-us>. Not needed here: P03 reads the state rasters directly.
 
 **National exposure figures for reconciliation (P08):** BTS, 18 Nov 2020, 2018 data, aviation + road, LAeq,24h: 23.1% of the population (74.7 M) at ≥ 45 dBA; 10.2% at 45–49, 6.5% at 50–54, 3.5% at 55–59, 2.3% at 60–69, 0.5% at 70–79, 0.1% at ≥ 80. Source: <https://content.govdelivery.com/accounts/USDOT/bulletins/2ad18fa>.
 

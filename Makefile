@@ -8,8 +8,9 @@ help:  ## Show this help
 setup:  ## Install the environment (uv)
 	uv sync
 
-ingest:  ## Download raw data: BTS noise, Census, NYC 311 (P03-P05)
-	@echo "TODO (P03-P05): $(PY) ne.ingest.bts_noise / acs / tiger / nyc311"
+ingest:  ## Ingest raw data: BTS noise (P03), Census, NYC 311 (P04-P05)
+	$(PY) ne.ingest.bts_noise
+	@echo "TODO (P04-P05): $(PY) ne.ingest.acs / tiger / nyc311"
 
 build:  ## Zonal stats and analysis tables (P06-P09, P12)
 	@echo "TODO (P07-P09, P12): $(PY) ne.build.zonal_stats / analysis_table / nyc_panel"
@@ -18,6 +19,7 @@ models:  ## Disparity, spatial and complaint models (P10-P15)
 	@echo "TODO (P10-P15): $(PY) ne.models.disparity / spatial_reg / complaints_nb / who_erf"
 
 figures:  ## Make all charts (P10-P16)
+	$(PY) ne.viz.qa
 	@echo "TODO (P10-P16): $(PY) ne.viz.figures / maps"
 
 report:  ## Render the Quarto report (P17)

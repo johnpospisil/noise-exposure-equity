@@ -41,14 +41,16 @@ Sizes marked † were **measured live on 2026-11-17**. Sizes marked ~ are estima
 | 9 | **WHO exposure-response functions** | WHO 2018 Environmental Noise Guidelines + Guski et al. 2017 (annoyance) and Basner & McGuire 2018 (sleep) systematic reviews | Published | Coefficients coded by hand into `who_erf.py` | — | — |
 | 10 | **EPA EJScreen (archived)** | Public Environmental Data Partners rebuild (v2.3), Yale mirror, Harvard EELP tracker, Wayback | Open mirrors | Optional: cross-check demographic and traffic-proximity indicators | ~2–3 GB | optional |
 
-**Total local disk to plan for: about 50–70 GB** (revised in P02; rasters dominate). Everything except the rasters fits in under 5 GB. Rasters are processed **one metro window at a time** from COGs, so RAM stays under ~8 GB.
+**Total local disk: about 20 GB** (measured in P03: 5.5 GB BTS zips + 9.9 GB COGs; nothing is unzipped; Census blocks add ~3–5 GB). Rasters are read **one state / metro window at a time** from COGs, so RAM stays under ~8 GB.
 
 ### Data caveats (fixed in the analysis design)
 - **Rail is not comparable over time.** 2016 has no rail, 2018 has passenger rail only (prototype), 2020 has freight + passenger. Change-over-time results are **road + aviation only**; rail is reported for 2020 only.
 - **Values below 45 dBA are not in the rasters** (left-censored). Treat nodata as "< 45 dBA". For energy sums and WHO functions, use a stated floor (default 45; sensitivity at 40 and 0-contribution).
 - **Metric mismatch.** BTS uses LAeq,24h; WHO uses Lden / Lnight. Convert with documented offsets (road: Lden ≈ LAeq24 + ~3 dB; Lnight ≈ LAeq24 − ~7 dB), flag the numbers as estimates and run sensitivity checks.
 - BTS says the map "should not be used to evaluate noise levels in individual locations", so the address lookup must say this clearly.
-- The CONUS mosaic rasters need BTS's published **repair steps** before use (see P03).
+- BTS's mosaic **repair steps are not needed**: we read the per-state rasters directly (P03). Each block group is measured on its own state's raster, because 2022 and aviation state rasters do not share one grid.
+- **The rail layers do not include the NYC subway** (including elevated lines). Say so in the NYC section.
+- Rail and aviation values reach ~125 dB on track lines and runways (model ceiling); see the P03 question on capping for energy means.
 - The 2020 inputs reflect COVID-era traffic. Note this whenever 2018 and 2020 are compared.
 
 ### Data licences
@@ -102,7 +104,7 @@ noise-exposure-equity/
 
 ### Phase 1: Ingest (Week 1)
 
-- [ ] **P03: Ingest BTS noise rasters.**
+- [x] ✅ DONE! **P03: Ingest BTS noise rasters.** _Done 2026-11-17: 11 CONUS layers (2016–2022) → 537 state COGs (9.9 GB) + display VRTs, read straight from zips; no mosaic repair needed; 35 tests pass._
   `ingest/bts_noise.py`: download 2016/2018/2020 CONUS road, aviation, rail and combined layers (resumable, checksummed), apply BTS mosaic repair steps, convert to Cloud-Optimised GeoTIFFs with overviews, record CRS / resolution / nodata / dtype. Tests on raster metadata.
   **Deliverables:** `data/raw/bts/` manifest (file, size, sha256), `gdalinfo` summary per layer, quick-look PNG of one metro per layer.
   **Questions:** Download all three years now, or 2020 first and older years later? Include AK/HI (spec is metro-focused, so default to CONUS only)?
@@ -125,7 +127,7 @@ noise-exposure-equity/
   **Questions:** Which ERF set to treat as primary (WHO 2018 / Guski 2017 or the newer EU END guidance)? Floor for censored cells (default 45 dB)?
 
 - [ ] **P07: Zonal stats pilot on one metro.**
-  `build/zonal_stats.py`: for one metro, compute per block the area share ≥ each threshold and the energy-mean dB, by source and year (exactextract); aggregate to block groups weighted by 2020 block population. Validate: compare 5–10 tracts next to known interstates and the main airport against expectations (and FAA Part 150 contours if available). Time and memory profile.
+  `build/zonal_stats.py`: for one metro, compute per block the area share ≥ each threshold and the median dB (plus a 100 dB-capped energy mean as a sensitivity), by source and year (see decision log, P03) (exactextract); aggregate to block groups weighted by 2020 block population. Validate: compare 5–10 tracts next to known interstates and the main airport against expectations (and FAA Part 150 contours if available). Time and memory profile.
   **Deliverables:** pilot BG table, validation table, map PNG of the pilot metro, runtime estimate for scaling up.
   **Questions:** Which pilot metro (default: New York, since it feeds the NYC analysis; or a smaller one like Atlanta for speed)? Is block-population weighting enough, or also mask to NLCD developed land?
 
@@ -209,5 +211,7 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17: Census API key is in `.env`. NHGIS account being set up (used for crosswalks only). ACS tables come from the Census API.
 - 2026-11-17: **EJScreen skipped** (not used as a cross-check).
 - 2026-11-17: NHGIS usage licence accepted (no redistribution; cite and add to bibliography). Plan: compute noise for every year on 2020 block groups so NHGIS is needed only for 2014–18 ACS; NHGIS files never leave `data/raw/nhgis/`.
+- 2026-11-17 (P03): **Homebrew GDAL 3.13** installed (`brew install gdal`), used only for `gdal_translate` (2022 FileGDB rasters) and `gdalbuildvrt` (display mosaics). Everything else uses rasterio's bundled GDAL. Scope is CONUS only (no AK/HI).
+- 2026-11-17 (P03): **Block-group noise metrics.** Area energy means are dominated by track/runway/lane cells where nobody lives (one 125 dB cell among 999 at 50 dB gives a 95 dB energy mean). So: (1) headline = **population share ≥ 55 / 65 dBA**; (2) typical level = **median dB per block, population-weighted to the block group** (not an energy mean over area); (3) energy sums only where physics needs them (combining sources at a cell, WHO ERFs in P14); (4) sensitivity: energy mean with values capped at 100 dB. Raw raster values are kept unchanged.
 - 2026-11-17 (P02): **2022 BTS map (released May 2026) is the main "current" year**, paired with ACS 2018–22. 2020 stays as a robustness check (COVID-era traffic). Change over time: 2016 → 2018 → 2022 (road + aviation).
 - 2026-11-17 (P02): **NHGIS dropped.** Earlier demographics come from ACS 2016–20, which is already on 2020 block groups, so no crosswalk is needed. Keep the NHGIS licence notes in case this is revisited.
