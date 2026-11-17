@@ -1,0 +1,4 @@
+# The 20 largest metropolitan statistical areas (CBSAs) by population.
+# Filled in by P04 from the Census CBSA delineation file and ACS population.
+# Each entry: { cbsa: "35620", name: "New York-Newark-Jersey City, NY-NJ", pop: 19_500_000 }
+metros: []

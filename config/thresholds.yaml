@@ -1,0 +1,16 @@
+# Noise thresholds, LAeq,24h in dBA (the BTS map metric).
+# The BTS rasters omit cells below 45 dBA (left-censored).
+exposure_thresholds_dba: [45, 55, 65, 70]
+headline_threshold_dba: 65
+secondary_threshold_dba: 55
+
+# Floor used when a cell is below the mapped range (< 45 dBA).
+# Sensitivity checks: 40 dBA, and "no contribution".
+censor_floor_dba: 45
+
+# Approximate offsets from LAeq,24h to WHO metrics (estimates; see P06).
+# Lden ≈ LAeq24 + lden_offset; Lnight ≈ LAeq24 + lnight_offset.
+metric_offsets_db:
+  road: { lden_offset: 3.0, lnight_offset: -7.0 }
+  rail: { lden_offset: 3.0, lnight_offset: -7.0 }
+  aviation: { lden_offset: 3.0, lnight_offset: -7.0 }

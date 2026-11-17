@@ -1,0 +1,24 @@
+# Data: raw and interim are never committed; processed only via explicit `git add -f` of small files
+data/raw/*
+data/interim/*
+data/processed/*
+!data/**/.gitkeep
+
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Report build
+report/_site/
+report/.quarto/
+report/_freeze/
+
+# OS
+.DS_Store
