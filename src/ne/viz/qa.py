@@ -150,6 +150,59 @@ def nyc311_monthly(out=None):
     return out
 
 
+def zonal_pilot_map(cbsa: str = "35620", year: int = 2022, t: int = 65, window="nyc", out=None):
+    """Block-group share of residents at or above ``t`` dBA, by source (P07 pilot)."""
+    import geopandas as gpd
+    import pandas as pd
+
+    from ne.build import zonal_stats as zs
+
+    f = zs.OUT_DIR / cbsa / "bg_noise.parquet"
+    if not f.exists():
+        return None
+    bg = pd.read_parquet(f)
+    bg = bg[bg["year"] == year]
+    geo = gpd.read_parquet(zs.CENSUS / "bg_2020.parquet", columns=["geoid", "geometry"])
+    geo = geo.to_crs(zs.CRS).rename(columns={"geoid": "bg_geoid"})
+    title, lonlat = WINDOWS[window]
+    x0, y0, x1, y1 = _albers_bounds(lonlat)
+
+    edges = [0.0, 0.01, 0.05, 0.15, 0.30, 0.50, 1.0001]
+    labels = ["< 1%", "1-5%", "5-15%", "15-30%", "30-50%", "50%+"]
+    colors = [theme.BELOW_COLOR, *theme.NOISE_COLORS[1:]]
+    sources = [s for s in ("road", "aviation", "rail", "all") if s in set(bg["source"])]
+    fig, axes = plt.subplots(1, len(sources), figsize=(4.6 * len(sources), 5.6))
+    for ax, src in zip(np.atleast_1d(axes), sources, strict=True):
+        d = geo.merge(bg[bg["source"] == src], on="bg_geoid")
+        d = d.cx[x0:x1, y0:y1]
+        cls = np.digitize(d[f"pop_share_ge_{t}"].fillna(0), edges[1:-1])
+        d.plot(ax=ax, color=[colors[c] for c in cls], linewidth=0)
+        d[d["pop20"] == 0].plot(ax=ax, color="white", linewidth=0)
+        ax.set_xlim(x0, x1)
+        ax.set_ylim(y0, y1)
+        ax.set_axis_off()
+        ax.set_title({"all": "all sources (energy sum)"}.get(src, src), fontsize=12,
+                     color=theme.INK)  # fmt: skip
+    handles = [Patch(color=c, label=lab) for c, lab in zip(colors, labels, strict=True)]
+    fig.legend(handles=handles, loc="lower center", ncol=len(handles), frameon=False,
+               bbox_to_anchor=(0.5, 0.05),
+               title=f"Share of residents in blocks at or above {t} dBA LAeq,24h",
+               fontsize=10)  # fmt: skip
+    fig.suptitle(f"{title}, {year}: modelled transportation noise by block group (QA pilot)",
+                 fontsize=13, color=theme.INK)  # fmt: skip
+    fig.text(0.5, 0.015, "Modelled, not measured (BTS National Transportation Noise Map). "
+             "Block-group values weight 2020 blocks by population; white = no residents. "
+             "Rail excludes the NYC subway.", ha="center", fontsize=9,
+             color=theme.INK_MUTED)  # fmt: skip
+    fig.tight_layout(rect=(0, 0.16, 1, 0.95))
+    out = out or QA_DIR / f"zonal_pilot_{cbsa}_{year}_ge{t}.png"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=110)
+    plt.close(fig)
+    return out
+
+
 if __name__ == "__main__":
     print(bts_quicklook())
     print(nyc311_monthly())
+    print(zonal_pilot_map())

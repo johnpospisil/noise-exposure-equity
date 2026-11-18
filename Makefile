@@ -15,7 +15,8 @@ ingest:  ## Ingest raw data: BTS noise (P03), Census, NYC 311 (P04-P05)
 	$(PY) ne.ingest.nyc311
 
 build:  ## Zonal stats and analysis tables (P06-P09, P12)
-	@echo "TODO (P07-P09, P12): $(PY) ne.build.zonal_stats / analysis_table / nyc_panel"
+	$(PY) ne.build.zonal_stats --metro 35620
+	@echo "TODO (P08-P09, P12): all metros, analysis_table, nyc_panel"
 
 models:  ## Disparity, spatial and complaint models (P10-P15)
 	@echo "TODO (P10-P15): $(PY) ne.models.disparity / spatial_reg / complaints_nb / who_erf"

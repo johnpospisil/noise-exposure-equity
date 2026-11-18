@@ -127,7 +127,7 @@ noise-exposure-equity/
   **Deliverables:** modules + passing tests; a one-page note on the formulas and the sources for each coefficient.
   **Questions:** Which ERF set to treat as primary (WHO 2018 / Guski 2017 or the newer EU END guidance)? Floor for censored cells (default 45 dB)?
 
-- [ ] **P07: Zonal stats pilot on one metro.**
+- [x] ✅ DONE! **P07: Zonal stats pilot on one metro.** _Done 2026-11-17: New York, 192k blocks → 14,982 BGs × 4 years × 5 sources in 9.4 min (peak 5.3 GB); validation tracts behave as expected; 98 tests pass._
   `build/zonal_stats.py`: for one metro, compute per block the area share ≥ each threshold and the median dB (plus a 100 dB-capped energy mean as a sensitivity), by source and year (see decision log, P03) (exactextract); aggregate to block groups weighted by 2020 block population. Validate: compare 5–10 tracts next to known interstates and the main airport against expectations (and FAA Part 150 contours if available). Time and memory profile.
   **Deliverables:** pilot BG table, validation table, map PNG of the pilot metro, runtime estimate for scaling up.
   **Questions:** Which pilot metro (default: New York, since it feeds the NYC analysis; or a smaller one like Atlanta for speed)? Is block-population weighting enough, or also mask to NLCD developed land?
@@ -218,7 +218,8 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17 (P04): **Income quintiles within each metro** (spec), built in P09. **ACS reliability: flag and keep** block groups with missing income or CV > 0.30 (`acs_cv_flag`); drop them as a P15 robustness check.
 - 2026-11-17 (P06): **Metric offsets**: road and aviation Lden = LAeq24 + 3, Lnight = LAeq24 − 7; rail +5 / −2 (freight runs at night). Assumptions, tested in P15.
 - 2026-11-17 (P06): **Health headline = extra cases above the WHO guideline level**; total cases above the curve's lower limit reported alongside (P14).
-- 2026-11-17 (P07): Pilot metro = **New York**; block-population weighting, no NLCD mask.
+- 2026-11-17 (P07): **Road results are "major-road noise"** everywhere they are reported: the BTS road model covers highways and arterials, not local streets (only 27% of New York metro residents are in blocks with any road noise ≥ 45 dBA).
+- 2026-11-17 (P07): Pilot metro = **New York**; block-population weighting, no NLCD mask. Sources are combined per cell on each state's road grid (nearest neighbour), and a censored source adds nothing (`policy="zero"`). Sources: road, aviation, rail, `road_aviation` (comparable over time), `all` (years with rail).
 - 2026-11-17 (P06): **Primary ERFs = WHO 2018** (Guski 2017 %HA, Basner & McGuire 2018 %HSD, as in Directive (EU) 2020/367). Censored-cell floor 45 dB; sensitivity 40 dB and zero contribution.
 - 2026-11-17 (P05): **Complaint outcome = location-days** (a location counted at most once per day per complaint group; same-minute app repeats collapse automatically). Raw counts are a robustness check, plus a sensitivity run without the top locations (cut-off set in P12).
 - 2026-11-17 (P05): 311 kept from 2010; **analysis window 2016 onward**. `Noise - Helicopter` = aviation, reported separately. `Noise Survey` dropped.
