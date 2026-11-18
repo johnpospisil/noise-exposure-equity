@@ -8,11 +8,13 @@ secondary_threshold_dba: 55
 # Sensitivity checks: 40 dBA, and "no contribution".
 censor_floor_dba: 45
 
-# Approximate offsets from LAeq,24h to WHO metrics (estimates; see P06).
+# Approximate offsets from LAeq,24h to WHO metrics (assumptions; see docs/decibel_math_and_erfs.md).
+# Road / aviation: road-like day-evening-night split. Rail: flatter (freight runs at night).
+# Decision P06; sensitivity in P15.
 # Lden ≈ LAeq24 + lden_offset; Lnight ≈ LAeq24 + lnight_offset.
 metric_offsets_db:
   road: { lden_offset: 3.0, lnight_offset: -7.0 }
-  rail: { lden_offset: 3.0, lnight_offset: -7.0 }
+  rail: { lden_offset: 5.0, lnight_offset: -2.0 }
   aviation: { lden_offset: 3.0, lnight_offset: -7.0 }
 
 # ACS reliability flag (P04): block groups are flagged, not dropped.

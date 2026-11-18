@@ -122,7 +122,7 @@ noise-exposure-equity/
 
 ### Phase 2: Build the exposure dataset (Weeks 1–2)
 
-- [ ] **P06: Decibel math and WHO exposure-response functions (TDD).**
+- [x] ✅ DONE! **P06: Decibel math and WHO exposure-response functions (TDD).** _Done 2026-11-17: energy sum/mean with censoring policies and cap; WHO 2018 %HA/%HSD curves pass WHO anchor values; LAeq24→Lden/Lnight offsets; 85 tests pass; note in docs/decibel_math_and_erfs.md._
   `build/combine_sources.py` (energy sum, energy mean, handling of censored < 45 dB cells) and `models/who_erf.py` (%HA road/rail/aircraft, %HSD, LAeq24→Lden/Lnight conversions). Write the tests first: 60 + 60 = 63.01 dB, nodata handling, known ERF values from the literature.
   **Deliverables:** modules + passing tests; a one-page note on the formulas and the sources for each coefficient.
   **Questions:** Which ERF set to treat as primary (WHO 2018 / Guski 2017 or the newer EU END guidance)? Floor for censored cells (default 45 dB)?
@@ -216,6 +216,10 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17 (P03): **Block-group noise metrics.** Area energy means are dominated by track/runway/lane cells where nobody lives (one 125 dB cell among 999 at 50 dB gives a 95 dB energy mean). So: (1) headline = **population share ≥ 55 / 65 dBA**; (2) typical level = **median dB per block, population-weighted to the block group** (not an energy mean over area); (3) energy sums only where physics needs them (combining sources at a cell, WHO ERFs in P14); (4) sensitivity: energy mean with values capped at 100 dB. Raw raster values are kept unchanged.
 - 2026-11-17 (P04): Metros = 20 largest MSAs by 2020 Census population, **OMB March 2020 delineations** (match 2020 block geography). Block population comes from TIGER `POP20` (no separate API pull).
 - 2026-11-17 (P04): **Income quintiles within each metro** (spec), built in P09. **ACS reliability: flag and keep** block groups with missing income or CV > 0.30 (`acs_cv_flag`); drop them as a P15 robustness check.
+- 2026-11-17 (P06): **Metric offsets**: road and aviation Lden = LAeq24 + 3, Lnight = LAeq24 − 7; rail +5 / −2 (freight runs at night). Assumptions, tested in P15.
+- 2026-11-17 (P06): **Health headline = extra cases above the WHO guideline level**; total cases above the curve's lower limit reported alongside (P14).
+- 2026-11-17 (P07): Pilot metro = **New York**; block-population weighting, no NLCD mask.
+- 2026-11-17 (P06): **Primary ERFs = WHO 2018** (Guski 2017 %HA, Basner & McGuire 2018 %HSD, as in Directive (EU) 2020/367). Censored-cell floor 45 dB; sensitivity 40 dB and zero contribution.
 - 2026-11-17 (P05): **Complaint outcome = location-days** (a location counted at most once per day per complaint group; same-minute app repeats collapse automatically). Raw counts are a robustness check, plus a sensitivity run without the top locations (cut-off set in P12).
 - 2026-11-17 (P05): 311 kept from 2010; **analysis window 2016 onward**. `Noise - Helicopter` = aviation, reported separately. `Noise Survey` dropped.
 - 2026-11-17 (P02): **2022 BTS map (released May 2026) is the main "current" year**, paired with ACS 2018–22. 2020 stays as a robustness check (COVID-era traffic). Change over time: 2016 → 2018 → 2022 (road + aviation).
