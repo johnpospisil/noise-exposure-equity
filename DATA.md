@@ -145,6 +145,11 @@ CBSA delineation file (county → CBSA): `…/metro-micro/geographies/reference-
 - **By year (†):** 202 k (2010) rising to 479 k (2019); 802 k (2020), 768 k, 740 k, 686 k, 753 k, 833 k (2025), 676 k (2026 to date).
 - **Known issues:** strong upward trend in 2010–2016 reflects 311 adoption and app/online channels, not more noise; Helicopter complaints jump ~15× after 2019 (new online form and advocacy campaigns); 2020 spike in Residential/Street complaints during COVID.
 - **Size:** ~1.5–2 GB as CSV; ~200–300 MB Parquet with ~12 columns.
+- **Ingested (P05, `ne.ingest.nyc311`):** 203 months (2010-01 → 2026-11), 16 columns (no street address text), `Noise Survey` removed: **8,646,306 complaints** (= 8,662,609 − 16,303), no duplicate `unique_key`. Raw monthly cache `data/raw/nyc311/` (370 MB); typed dataset `data/interim/nyc311/noise/year=YYYY/` (341 MB, `noise_group` column). Months less than two months old are re-fetched on each run.
+- **Geocoding QA (†):** 0.3–1.6% missing coordinates per year; 0% outside the NYC box.
+- **Repeat reports (†):** complaints sharing type, descriptor, point and minute with another: < 0.5%/yr before 2020, **2–6%/yr in 2020–2025**, almost all from the **mobile app** (8.2% of app complaints vs 0.1–0.5% phone/web), i.e. likely double submissions.
+- **Super-complainer locations (†):** one Bronx building (BBL 2048330028, ZIP 10466) logged **239,276** residential complaints, 115,364 of them in 2025 (25% of all residential noise complaints citywide that year), almost all via the app; its neighbour (BBL 2048330080) logged 118,403. The 10 busiest locations make up 10–18% of all noise complaints in 2020, 2022, 2024 and 2025. Counting each location at most once per day per group ("location-days") gives a much steadier series: ~480–550 k per year since 2020 vs 670–830 k raw.
+- **Helicopter:** ~1 k/yr in 2016–2018, 3.3 k in 2019, 10–26 k in 2020–2022, **59 k in 2023**, then 20–29 k.
 - **Licence:** NYC Open Data Terms of Use (free reuse with attribution). Publish tract-level counts only. **Citation:** City of New York, NYC Open Data, *311 Service Requests* (erm2-nwe9, 76ig-c548), accessed {date}.
 
 ## 7. NYC gentrification typology

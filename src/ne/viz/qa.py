@@ -10,6 +10,7 @@ no decibel values are averaged.
 from __future__ import annotations
 
 import matplotlib
+import matplotlib.dates
 
 matplotlib.use("Agg")
 
@@ -101,5 +102,54 @@ def bts_quicklook(window: str = "nyc", out=None):
     return out
 
 
+def nyc311_monthly(out=None):
+    """Monthly NYC 311 noise complaints, one small multiple per complaint group."""
+    import pandas as pd
+
+    from ne.ingest import nyc311
+
+    if not nyc311.OUT.exists():
+        return None
+    df = pd.read_parquet(nyc311.OUT, columns=["created_date", "noise_group"])
+    df["month"] = df["created_date"].dt.to_period("M").dt.to_timestamp()
+    t = df.groupby(["noise_group", "month"]).size().unstack(0).fillna(0)
+    t = t.iloc[:-1]  # drop the current, incomplete month
+    order = t.sum().sort_values(ascending=False).index
+
+    ncol = 4
+    nrow = -(-len(order) // ncol)
+    fig, axes = plt.subplots(nrow, ncol, figsize=(14, 3.0 * nrow), sharex=True)
+    for ax, g in zip(axes.flat, order, strict=False):
+        ax.plot(t.index, t[g] / 1000, color=theme.NOISE_COLORS[2], lw=1.5)
+        ax.axvline(pd.Timestamp(f"{nyc311.ANALYSIS_START_YEAR}-01-01"), color=theme.INK_MUTED,
+                   lw=0.8, ls="--")  # fmt: skip
+        ax.set_title(g.replace("_", " "), fontsize=11, color=theme.INK, loc="left")
+        ax.set_ylim(bottom=0)
+        ax.xaxis.set_major_locator(matplotlib.dates.YearLocator(4))
+        ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y"))
+        ax.grid(axis="y", color="#e4e2dd", lw=0.6)
+        ax.tick_params(colors=theme.INK_MUTED, labelsize=9)
+        for s in ("top", "right"):
+            ax.spines[s].set_visible(False)
+        for s in ("left", "bottom"):
+            ax.spines[s].set_color("#cfcdc8")
+    for ax in list(axes.flat)[len(order) :]:
+        ax.set_visible(False)
+    for ax in axes[:, 0]:
+        ax.set_ylabel("complaints / month (k)", fontsize=9, color=theme.INK_MUTED)
+    fig.suptitle("NYC 311 noise complaints per month, by complaint group (QA)", fontsize=13,
+                 color=theme.INK)  # fmt: skip
+    fig.text(0.5, 0.01, "Each panel has its own scale. Dashed line: analysis window starts "
+             f"{nyc311.ANALYSIS_START_YEAR}. Source: NYC Open Data 311 (76ig-c548, erm2-nwe9).",
+             ha="center", fontsize=9, color=theme.INK_MUTED)  # fmt: skip
+    fig.tight_layout(rect=(0, 0.03, 1, 0.96))
+    out = out or QA_DIR / "nyc311_monthly.png"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=110)
+    plt.close(fig)
+    return out
+
+
 if __name__ == "__main__":
     print(bts_quicklook())
+    print(nyc311_monthly())

@@ -12,7 +12,7 @@ ingest:  ## Ingest raw data: BTS noise (P03), Census, NYC 311 (P04-P05)
 	$(PY) ne.ingest.bts_noise
 	$(PY) ne.ingest.tiger
 	$(PY) ne.ingest.acs
-	@echo "TODO (P05): $(PY) ne.ingest.nyc311"
+	$(PY) ne.ingest.nyc311
 
 build:  ## Zonal stats and analysis tables (P06-P09, P12)
 	@echo "TODO (P07-P09, P12): $(PY) ne.build.zonal_stats / analysis_table / nyc_panel"

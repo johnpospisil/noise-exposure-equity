@@ -49,6 +49,7 @@ Sizes marked † were **measured live on 2026-11-17**. Sizes marked ~ are estima
 - **Metric mismatch.** BTS uses LAeq,24h; WHO uses Lden / Lnight. Convert with documented offsets (road: Lden ≈ LAeq24 + ~3 dB; Lnight ≈ LAeq24 − ~7 dB), flag the numbers as estimates and run sensitivity checks.
 - BTS says the map "should not be used to evaluate noise levels in individual locations", so the address lookup must say this clearly.
 - BTS's mosaic **repair steps are not needed**: we read the per-state rasters directly (P03). Each block group is measured on its own state's raster, because 2022 and aviation state rasters do not share one grid.
+- **311 complaint counts are dominated by a few locations** (one Bronx building filed 25% of 2025 residential complaints) and include app double-submits. Complaint models must not use raw counts alone; see the P05 question on location-days.
 - **The rail layers do not include the NYC subway** (including elevated lines). Say so in the NYC section.
 - Rail and aviation values reach ~125 dB on track lines and runways (model ceiling); see the P03 question on capping for energy means.
 - The 2020 inputs reflect COVID-era traffic. Note this whenever 2018 and 2020 are compared.
@@ -114,7 +115,7 @@ noise-exposure-equity/
   **Deliverables:** GeoParquet files + row counts; table of the selected metros with population; null/margin-of-error summary.
   **Questions:** Income quintiles within metro (spec) or national? How to handle block groups with high ACS margins of error (drop / flag / keep)?
 
-- [ ] **P05: Ingest NYC 311 noise complaints.**
+- [x] ✅ DONE! **P05: Ingest NYC 311 noise complaints.** _Done 2026-11-17: 8,646,306 noise complaints 2010-01→2026-11 (16 cols, partitioned Parquet); geocoding clean; found app double-submits and one Bronx building with 239k complaints; 57 tests pass._
   `ingest/nyc311.py`: page both Socrata datasets for `complaint_type LIKE 'Noise%'` (~8.7M rows), keep ~12 columns (id, created date, complaint type, descriptor, lat/lon, BBL, borough, incident zip, location type, status, channel), write Parquet partitioned by year. Geocoding QA: % missing coordinates, % outside NYC, duplicates.
   **Deliverables:** Parquet dataset, counts by year × type table, geocoding QA table, monthly time-series PNG.
   **Questions:** Study window (2010–present, or a stable post-2015 window since complaint categories changed)? Treat `Noise - Helicopter` as aviation, matching the aviation layer?
@@ -215,5 +216,7 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17 (P03): **Block-group noise metrics.** Area energy means are dominated by track/runway/lane cells where nobody lives (one 125 dB cell among 999 at 50 dB gives a 95 dB energy mean). So: (1) headline = **population share ≥ 55 / 65 dBA**; (2) typical level = **median dB per block, population-weighted to the block group** (not an energy mean over area); (3) energy sums only where physics needs them (combining sources at a cell, WHO ERFs in P14); (4) sensitivity: energy mean with values capped at 100 dB. Raw raster values are kept unchanged.
 - 2026-11-17 (P04): Metros = 20 largest MSAs by 2020 Census population, **OMB March 2020 delineations** (match 2020 block geography). Block population comes from TIGER `POP20` (no separate API pull).
 - 2026-11-17 (P04): **Income quintiles within each metro** (spec), built in P09. **ACS reliability: flag and keep** block groups with missing income or CV > 0.30 (`acs_cv_flag`); drop them as a P15 robustness check.
+- 2026-11-17 (P05): **Complaint outcome = location-days** (a location counted at most once per day per complaint group; same-minute app repeats collapse automatically). Raw counts are a robustness check, plus a sensitivity run without the top locations (cut-off set in P12).
+- 2026-11-17 (P05): 311 kept from 2010; **analysis window 2016 onward**. `Noise - Helicopter` = aviation, reported separately. `Noise Survey` dropped.
 - 2026-11-17 (P02): **2022 BTS map (released May 2026) is the main "current" year**, paired with ACS 2018–22. 2020 stays as a robustness check (COVID-era traffic). Change over time: 2016 → 2018 → 2022 (road + aviation).
 - 2026-11-17 (P02): **NHGIS dropped.** Earlier demographics come from ACS 2016–20, which is already on 2020 block groups, so no crosswalk is needed. Keep the NHGIS licence notes in case this is revisited.
