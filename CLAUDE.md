@@ -92,7 +92,7 @@ noise-exposure-equity/
 
 ## Prompts
 
-### Phase 0: Setup and access check (Week 1)
+### Phase 0: Setup and access check (Week 1) ✅ DONE
 
 - [x] ✅ DONE! **P01: Scaffold the repo.** _Done 2026-11-17: uv env (Python 3.12, rasterio 1.5.2 / GDAL 3.12.2, exactextract 0.3.0, spreg 1.9.2), Makefile, config, 3 smoke tests pass, lint clean; public GitHub repo created._
   Create the layout above: `uv` project (Python 3.12), `pyproject.toml` with dependencies, `ruff` and `pytest` config, `.gitignore` (data/raw, data/interim, .env), `Makefile` with stub targets (`ingest`, `build`, `models`, `figures`, `report`, `test`, `all`), `.env.example` (CENSUS_API_KEY, SOCRATA_APP_TOKEN), `config/thresholds.yaml` (45/55/65/70 dBA) and an empty `config/metros.yaml`. Check that GDAL/rasterio and exactextract install on macOS.
@@ -104,7 +104,7 @@ noise-exposure-equity/
   **Deliverables:** `DATA.md`; corrected size table; a short "access check" report (✅ / ⚠️ per source).
   **Questions:** Use the 20 largest metros (spec) or all ~380 metro CBSAs (same code, ~5× compute)? Include EJScreen as a cross-check or skip it? Census API or NHGIS for ACS?
 
-### Phase 1: Ingest (Week 1)
+### Phase 1: Ingest (Week 1) ✅ DONE
 
 - [x] ✅ DONE! **P03: Ingest BTS noise rasters.** _Done 2026-11-17: 11 CONUS layers (2016–2022) → 537 state COGs (9.9 GB) + display VRTs, read straight from zips; no mosaic repair needed; 35 tests pass._
   `ingest/bts_noise.py`: download 2016/2018/2020 CONUS road, aviation, rail and combined layers (resumable, checksummed), apply BTS mosaic repair steps, convert to Cloud-Optimised GeoTIFFs with overviews, record CRS / resolution / nodata / dtype. Tests on raster metadata.
@@ -121,7 +121,7 @@ noise-exposure-equity/
   **Deliverables:** Parquet dataset, counts by year × type table, geocoding QA table, monthly time-series PNG.
   **Questions:** Study window (2010–present, or a stable post-2015 window since complaint categories changed)? Treat `Noise - Helicopter` as aviation, matching the aviation layer?
 
-### Phase 2: Build the exposure dataset (Weeks 1–2)
+### Phase 2: Build the exposure dataset (Weeks 1–2) ✅ DONE
 
 - [x] ✅ DONE! **P06: Decibel math and WHO exposure-response functions (TDD).** _Done 2026-11-17: energy sum/mean with censoring policies and cap; WHO 2018 %HA/%HSD curves pass WHO anchor values; LAeq24→Lden/Lnight offsets; 85 tests pass; note in docs/decibel_math_and_erfs.md._
   `build/combine_sources.py` (energy sum, energy mean, handling of censored < 45 dB cells) and `models/who_erf.py` (%HA road/rail/aircraft, %HSD, LAeq24→Lden/Lnight conversions). Write the tests first: 60 + 60 = 63.01 dB, nodata handling, known ERF values from the literature.
@@ -138,7 +138,7 @@ noise-exposure-equity/
   **Deliverables:** `data/processed/bg_noise.parquet`; reconciliation table against BTS figures; run log.
   **Questions:** Any metros with odd results to look into before modelling?
 
-- [ ] **P09: Analysis table.**
+- [x] ✅ DONE! **P09: Analysis table.** _Done 2026-11-17: analysis_bg.parquet (1.53M rows, 49.6 MB) joins noise, ACS and metro; income quintiles within metro, population-weighted; data dictionary in DATA.md; 106 tests pass._
   `build/analysis_table.py`: join noise + demographics + metro IDs; income quintiles within metro. Noise for all years is already on 2020 block groups (P07/P08). Use the NHGIS 2010→2020 crosswalk only to bring 2014–18 ACS onto 2020 boundaries; crosswalked outputs stay local (NHGIS licence). Data dictionary with a "derived from" column.
   **Deliverables:** `data/processed/analysis_bg.parquet`, data dictionary in DATA.md, descriptive summary table.
   **Questions:** Race/ethnicity groups to report (default: NH White, NH Black, Hispanic, NH Asian, other)?
@@ -219,6 +219,9 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17 (P04): **Income quintiles within each metro** (spec), built in P09. **ACS reliability: flag and keep** block groups with missing income or CV > 0.30 (`acs_cv_flag`); drop them as a P15 robustness check.
 - 2026-11-17 (P06): **Metric offsets**: road and aviation Lden = LAeq24 + 3, Lnight = LAeq24 − 7; rail +5 / −2 (freight runs at night). Assumptions, tested in P15.
 - 2026-11-17 (P06): **Health headline = extra cases above the WHO guideline level**; total cases above the curve's lower limit reported alongside (P14).
+- 2026-11-17 (P09): Race/ethnicity groups: NH White, NH Black, Hispanic, NH Asian, other (other races + multiracial). `analysis_bg.parquet` stays local (49.6 MB, rebuilt by `make build`); result tables from P10 on are committed.
+- 2026-11-17 (P10): Headline threshold **65 dBA** (spec), with **55 dBA** shown alongside; palette = `theme.py` blue ramp.
+- 2026-11-17 (P09): Map years pair with ACS vintages: 2016/2018 → ACS 2016–20; 2020/2022 → ACS 2018–22. Income quintiles are weighted by ACS population within each metro.
 - 2026-11-17 (P08): **2022 cross-section is the headline.** Change over time is cut to a short descriptive box with a caveat on BTS model-input changes (no consistent-footprint analysis).
 - 2026-11-17 (P08): `bg_noise.parquet`, `metro_exposure.csv` and `bts_reconciliation.csv` are **committed to GitHub** (BTS + Census only, public domain; sources listed in `data/processed/README.md`). Anything built with ACS or 311 is checked case by case.
 - 2026-11-17 (P08): Exposure thresholds extended to **45/50/55/60/65/70 dBA** (50 and 60 for the BTS and UW benchmarks).

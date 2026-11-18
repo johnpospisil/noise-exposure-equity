@@ -217,3 +217,31 @@ Block-group noise exposure for the 20 metros, built by `ne.build.zonal_stats` (`
 - Rail is passenger-only in 2018, and extra lines appear in 2022 (San Francisco, San Diego, Boston).
 - So year-to-year differences mix real change with changes in the model's inputs.
 - In 2016–2020, aviation is resampled onto the road grid (up to half a 30 m cell). As a result, `road_aviation` falls slightly below `aviation` in 0.2% of block groups, typically by under 1 percentage point.
+
+## `data/processed/analysis_bg.parquet` (P09)
+
+Built by `ne.build.analysis_table` (`make build`). One row per 2020 block group × map year × source. 1,534,199 rows, 49.6 MB. Map years pair with ACS vintages: 2016/2018 → ACS 2016–20, 2020/2022 → ACS 2018–22.
+
+**Data dictionary**
+
+| Column | Meaning | Derived from |
+|---|---|---|
+| `cbsa`, `metro` | 2020 OMB metro code and short name | OMB March 2020 delineation; Census 2020 population ranking |
+| `bg_geoid` | 2020 block group (12 digits) | TIGER/Line 2020 |
+| `year` | BTS map year (2016, 2018, 2020, 2022) | BTS |
+| `source` | `road`, `aviation`, `rail`, `road_aviation`, `all` | BTS (combined by energy sum, P07) |
+| `pop20` | 2020 census population (sum of blocks); weights for noise shares | Census 2020 (TIGER `POP20`) |
+| `cells` | 30 m raster cells covering the block group (coverage-weighted) | BTS × TIGER |
+| `pop_share_ge_{45…70}` | share of residents in blocks at or above the level (LAeq,24h, dBA). **Headline: 55 / 65.** | BTS × Census 2020 blocks |
+| `area_share_ge_{45…70}` | same, weighted by area (P15 robustness) | BTS × TIGER |
+| `median_db` | population-weighted median of block median levels; NaN = below 45 dBA | BTS × Census 2020 blocks |
+| `emean_cap100_db` | population-weighted energy mean, 100 dB cap (sensitivity) | BTS × Census 2020 blocks |
+| `acs_end_year` | ACS 5-year vintage end year (2020 or 2022) | ACS |
+| `pop`, `households` | ACS total population, households | ACS B01003, B25003 |
+| `med_hh_income` (+ `_cv`) | median household income and its coefficient of variation | ACS B19013 |
+| `income_missing`, `income_cv_high`, `income_topcoded` | reliability flags (CV > 0.30); flagged rows are kept, P15 drops them | ACS B19013 |
+| `income_quintile` | 1 (lowest) – 5 within the metro, weighted by ACS population; NA without income or residents | ACS B19013, B01003 |
+| `pct_nh_white`, `pct_nh_black`, `pct_hispanic`, `pct_nh_asian`, `pct_other` | race / ethnicity shares (other = NH other races and multiracial) | ACS B03002 |
+| `pct_renter`, `pct_under18`, `pct_65plus` | renter households, age shares | ACS B25003, B01001 |
+
+All sources are public domain (BTS, Census). No NHGIS. Modelled noise, not measured; neighbourhood-level only.
