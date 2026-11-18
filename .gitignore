@@ -8,6 +8,7 @@ data/processed/*
 !data/processed/bg_noise.parquet
 !data/processed/metro_exposure.csv
 !data/processed/bts_reconciliation.csv
+!data/processed/disparity_*.csv
 
 # Secrets
 .env

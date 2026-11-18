@@ -20,11 +20,13 @@ build:  ## Zonal stats and analysis tables (P06-P09, P12)
 	@echo "TODO (P12): nyc_panel"
 
 models:  ## Disparity, spatial and complaint models (P10-P15)
-	@echo "TODO (P10-P15): $(PY) ne.models.disparity / spatial_reg / complaints_nb / who_erf"
+	$(PY) ne.models.disparity
+	@echo "TODO (P11-P15): spatial_reg / complaints_nb / health"
 
 figures:  ## Make all charts (P10-P16)
 	$(PY) ne.viz.qa
-	@echo "TODO (P10-P16): $(PY) ne.viz.figures / maps"
+	$(PY) ne.viz.figures
+	@echo "TODO (P11-P16): more charts and maps"
 
 report:  ## Render the Quarto report (P17)
 	@echo "TODO (P17): quarto render report"

@@ -145,8 +145,8 @@ noise-exposure-equity/
 
 ### Phase 3: Exposure disparities (Weeks 2–3)
 
-- [ ] **P10: Disparity tables and hero chart v1.**
-  `models/disparity.py`: population-weighted share ≥ 55 / 65 dBA by income quintile and race, per metro and pooled; source breakdown (road / rail / aviation). `viz/theme.py` + hero chart (small multiples, 20 metros, share ≥ 65 dBA by income quintile) + Chart 3 (disparity by source).
+- [x] ✅ DONE! **P10: Disparity tables and hero chart v1.** _Done 2026-11-17: disparity tables by income quintile and race (per metro + pooled, every year/source); hero chart and Chart 3; lowest-income fifth more exposed than highest in all 20 metros (pooled ≥ 65 dBA: 1.8% vs 0.9%); 111 tests pass._
+  `models/disparity.py`: population-weighted share ≥ 55 / 65 dBA by income quintile and race, per metro and pooled; source breakdown (road / rail / aviation). `viz/theme.py` + hero chart (small multiples, 20 metros, share ≥ 55 dBA by income quintile; 65 as the stricter test) + Chart 3 (disparity by source).
   **Deliverables:** disparity tables (CSV), hero chart v1, Chart 3, and a three-bullet "what we see".
   **Questions:** Headline threshold 65 dBA (spec) or 55? Visual style and palette preferences?
 
@@ -220,7 +220,7 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17 (P06): **Metric offsets**: road and aviation Lden = LAeq24 + 3, Lnight = LAeq24 − 7; rail +5 / −2 (freight runs at night). Assumptions, tested in P15.
 - 2026-11-17 (P06): **Health headline = extra cases above the WHO guideline level**; total cases above the curve's lower limit reported alongside (P14).
 - 2026-11-17 (P09): Race/ethnicity groups: NH White, NH Black, Hispanic, NH Asian, other (other races + multiracial). `analysis_bg.parquet` stays local (49.6 MB, rebuilt by `make build`); result tables from P10 on are committed.
-- 2026-11-17 (P10): Headline threshold **65 dBA** (spec), with **55 dBA** shown alongside; palette = `theme.py` blue ramp.
+- 2026-11-17 (P10): **Headline threshold 55 dBA**; 65 dBA is shown as the stricter test (changed from the spec after seeing the results: 65 dBA shares are 0.3–3%). Palette = `theme.py` blue ramp for quintiles, reference categorical slots 1–5 for race (validator: all checks pass; contrast relief via direct axis labels).
 - 2026-11-17 (P09): Map years pair with ACS vintages: 2016/2018 → ACS 2016–20; 2020/2022 → ACS 2018–22. Income quintiles are weighted by ACS population within each metro.
 - 2026-11-17 (P08): **2022 cross-section is the headline.** Change over time is cut to a short descriptive box with a caveat on BTS model-input changes (no consistent-footprint analysis).
 - 2026-11-17 (P08): `bg_noise.parquet`, `metro_exposure.csv` and `bts_reconciliation.csv` are **committed to GitHub** (BTS + Census only, public domain; sources listed in `data/processed/README.md`). Anything built with ACS or 311 is checked case by case.
