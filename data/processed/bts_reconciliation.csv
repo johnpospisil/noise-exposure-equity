@@ -1,0 +1,7 @@
+benchmark,year,source,t,published_pct,our_20_metros_pct,derived_from
+"UW DEOHS 2020, all sources",2020,all,45,29.1,35.46,BTS National Transportation Noise Map; 2020 Census blocks (TIGER POP20)
+"UW DEOHS 2020, all sources",2020,all,60,3.6,3.45,BTS National Transportation Noise Map; 2020 Census blocks (TIGER POP20)
+"BTS 2014 map, aviation",2016,aviation,50,2.88,7.0,BTS National Transportation Noise Map; 2020 Census blocks (TIGER POP20)
+"BTS 2014 map, aviation",2016,aviation,60,0.23,0.41,BTS National Transportation Noise Map; 2020 Census blocks (TIGER POP20)
+"BTS 2014 map, Interstates only",2016,road,50,2.05,10.73,BTS National Transportation Noise Map; 2020 Census blocks (TIGER POP20)
+"BTS 2014 map, Interstates only",2016,road,60,0.75,2.22,BTS National Transportation Noise Map; 2020 Census blocks (TIGER POP20)

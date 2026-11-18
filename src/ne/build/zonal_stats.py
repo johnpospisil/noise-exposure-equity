@@ -21,7 +21,8 @@ censored source adds nothing), giving ``road_aviation`` (comparable over time) a
 
 Usage::
 
-    uv run python -m ne.build.zonal_stats --metro 35620          # New York, all years
+    uv run python -m ne.build.zonal_stats                        # every metro, 2 workers
+    uv run python -m ne.build.zonal_stats --metro 35620          # New York only
 """
 
 from __future__ import annotations
@@ -29,6 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import time
+from contextlib import ExitStack
 from pathlib import Path
 
 import geopandas as gpd
@@ -38,7 +40,7 @@ import rasterio
 from affine import Affine
 from rasterio.vrt import WarpedVRT
 from rasterio.warp import Resampling
-from rasterio.windows import from_bounds
+from rasterio.windows import Window, from_bounds
 
 from ne import config
 from ne.build import combine_sources as cs
@@ -103,19 +105,29 @@ def summarise_cells(values, coverage, thresholds=THRESHOLDS, cap=CAP_DB, floor=N
     return df
 
 
-def block_stats(raster, blocks: gpd.GeoDataFrame, thresholds=THRESHOLDS) -> pd.DataFrame:
-    """Block-level stats from one raster. Returns ``blocks`` columns (no geometry) + stats."""
+def block_stats(
+    raster, blocks: gpd.GeoDataFrame, thresholds=THRESHOLDS, batch: int = 20_000
+) -> pd.DataFrame:
+    """Block-level stats from one raster. Returns ``blocks`` columns (no geometry) + stats.
+
+    Blocks go through exactextract in batches so that per-cell arrays for large rural
+    blocks never pile up in memory.
+    """
     from exactextract import exact_extract
 
     geoms = blocks[["geometry"]].to_crs(CRS) if blocks.crs != CRS else blocks[["geometry"]]
+    geoms = geoms.reset_index(drop=True)
+    parts = []
     with rasterio.open(raster) as src:
-        ee = exact_extract(
-            src,
-            geoms.reset_index(drop=True),
-            ["values(default_value=-1)", "coverage(default_value=-1)"],
-            output="pandas",
-        )
-    stats = summarise_cells(list(ee["values"]), list(ee["coverage"]), thresholds)
+        for i in range(0, len(geoms), batch):
+            ee = exact_extract(
+                src,
+                geoms.iloc[i : i + batch],
+                ["values(default_value=-1)", "coverage(default_value=-1)"],
+                output="pandas",
+            )
+            parts.append(summarise_cells(list(ee["values"]), list(ee["coverage"]), thresholds))
+    stats = pd.concat(parts, ignore_index=True)
     return pd.concat([blocks.drop(columns="geometry").reset_index(drop=True), stats], axis=1)
 
 
@@ -152,7 +164,7 @@ def aggregate_to_bg(blocks: pd.DataFrame, thresholds=THRESHOLDS, keys=()) -> pd.
 # --- rasters --------------------------------------------------------------------------
 
 
-def combine_rasters(paths, out: Path, bounds) -> Path:
+def combine_rasters(paths, out: Path, bounds, strip_rows: int = 1024) -> Path:
     """Energy-sum several source rasters onto the first raster's grid, clipped to ``bounds``.
 
     Nearest-neighbour resampling (no dB values are interpolated); a censored source adds no
@@ -165,22 +177,29 @@ def combine_rasters(paths, out: Path, bounds) -> Path:
         width = int(np.ceil(win.col_off + win.width)) - col0
         height = int(np.ceil(win.row_off + win.height)) - row0
         transform = ref.transform @ Affine.translation(col0, row0)
-    layers = []
-    for p in paths:
-        with rasterio.open(p) as src, WarpedVRT(
-            src, crs=CRS, transform=transform, width=width, height=height,
-            resampling=Resampling.nearest, nodata=NODATA, src_nodata=NODATA,
-        ) as vrt:  # fmt: skip
-            layers.append(cs.from_raster(vrt.read(1)))
-    total = cs.energy_sum(np.stack(layers), policy="zero")
     out.parent.mkdir(parents=True, exist_ok=True)
+    tmp = out.with_suffix(".part.tif")
     profile = dict(
         driver="GTiff", width=width, height=height, count=1, dtype="float32", crs=CRS,
         transform=transform, nodata=NODATA, tiled=True, blockxsize=512, blockysize=512,
         compress="deflate",
     )  # fmt: skip
-    with rasterio.open(out, "w", **profile) as dst:
-        dst.write(np.where(np.isnan(total), NODATA, total).astype("float32"), 1)
+    with ExitStack() as stack:
+        vrts = [
+            stack.enter_context(WarpedVRT(
+                stack.enter_context(rasterio.open(p)), crs=CRS, transform=transform,
+                width=width, height=height, resampling=Resampling.nearest,
+                nodata=NODATA, src_nodata=NODATA,
+            ))
+            for p in paths
+        ]  # fmt: skip
+        dst = stack.enter_context(rasterio.open(tmp, "w", **profile))
+        for r0 in range(0, height, strip_rows):
+            win = Window(0, r0, width, min(strip_rows, height - r0))
+            layers = np.stack([cs.from_raster(v.read(1, window=win)) for v in vrts])
+            total = cs.energy_sum(layers, policy="zero")
+            dst.write(np.where(np.isnan(total), NODATA, total).astype("float32"), 1, window=win)
+    tmp.replace(out)
     return out
 
 
@@ -255,18 +274,6 @@ def run_metro(cbsa: str, years=None, log=print) -> dict:
     return {"blocks": blk, "bg": bg, "timings": pd.DataFrame(timings)}
 
 
-def main(argv=None):
-    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    p.add_argument("--metro", default="35620", help="CBSA code (default New York)")
-    p.add_argument("--years", type=int, nargs="*")
-    a = p.parse_args(argv)
-    run_metro(a.metro, a.years)
-
-
-if __name__ == "__main__":
-    main()
-
-
 # --- validation -----------------------------------------------------------------------
 
 #: (label, lon, lat, expectation) for the New York pilot (P07)
@@ -310,3 +317,116 @@ def validate_points(bg: pd.DataFrame, checks=NYC_CHECKS, year: int = 2022) -> pd
                 row[f"{s}_ge{t}"] = round(100 * v, 1)
         rows.append(row)
     return pd.DataFrame(rows)
+
+
+# --- all metros -----------------------------------------------------------------------
+
+PROCESSED = config.PROCESSED_DIR / "bg_noise.parquet"
+
+
+def is_done(cbsa: str, years) -> bool:
+    meta = OUT_DIR / cbsa / "meta.json"
+    if not (meta.exists() and (OUT_DIR / cbsa / "bg_noise.parquet").exists()):
+        return False
+    return json.loads(meta.read_text())["years"] == list(years)
+
+
+def _run_logged(cbsa: str, years) -> tuple[str, float]:
+    log_path = OUT_DIR / cbsa / "run.log"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    t0 = time.time()
+    with open(log_path, "w") as f:
+
+        def log(msg):
+            print(msg, file=f, flush=True)
+
+        run_metro(cbsa, years, log=log)
+    return cbsa, time.time() - t0
+
+
+def run_all(workers: int = 2, overwrite: bool = False, years=None, log=print) -> pd.DataFrame:
+    """Every metro in ``config/metros.yaml``, largest first, skipping finished ones."""
+    from concurrent.futures import ProcessPoolExecutor, as_completed
+
+    years = years or sorted({y for y, _ in bn.LAYERS})
+    metros = config.metros()
+    todo = [m["cbsa"] for m in metros if overwrite or not is_done(m["cbsa"], years)]
+    names = {m["cbsa"]: m["short"] for m in metros}
+    log(f"{len(todo)} metros to run, {len(metros) - len(todo)} already done")
+    with ProcessPoolExecutor(workers) as ex:
+        futs = {ex.submit(_run_logged, c, years): c for c in todo}
+        for i, f in enumerate(as_completed(futs), 1):
+            cbsa, secs = f.result()
+            log(f"[{i}/{len(todo)}] {names[cbsa]} ({cbsa}) {secs / 60:.1f} min")
+    return assemble()
+
+
+def assemble() -> pd.DataFrame:
+    """Stack every metro's block-group table into ``data/processed/bg_noise.parquet``."""
+    parts = [pd.read_parquet(OUT_DIR / m["cbsa"] / "bg_noise.parquet") for m in config.metros()]
+    bg = pd.concat(parts, ignore_index=True)
+    floats = bg.select_dtypes("float64").columns
+    bg[floats] = bg[floats].astype("float32")  # < 50 MB rule for data/processed
+    bg["year"] = bg["year"].astype("int16")
+    PROCESSED.parent.mkdir(parents=True, exist_ok=True)
+    bg.to_parquet(PROCESSED, index=False, compression="zstd")
+    return bg
+
+
+# --- reconciliation -------------------------------------------------------------------
+
+#: Published national figures (percent of U.S. population at or above the level).
+#: UW DEOHS: BTS 2020 map, road + rail + aviation, block groups -> tracts, ACS 2016-20.
+#: BTS 2017 release: 2014 map, aviation and Interstate highways separately (sums of bands).
+BENCHMARKS = [
+    {"benchmark": "UW DEOHS 2020, all sources", "year": 2020, "source": "all", "t": 45,
+     "published_pct": 29.1},
+    {"benchmark": "UW DEOHS 2020, all sources", "year": 2020, "source": "all", "t": 60,
+     "published_pct": 3.6},
+    {"benchmark": "BTS 2014 map, aviation", "year": 2016, "source": "aviation", "t": 50,
+     "published_pct": 2.88},
+    {"benchmark": "BTS 2014 map, aviation", "year": 2016, "source": "aviation", "t": 60,
+     "published_pct": 0.23},
+    {"benchmark": "BTS 2014 map, Interstates only", "year": 2016, "source": "road", "t": 50,
+     "published_pct": 2.05},
+    {"benchmark": "BTS 2014 map, Interstates only", "year": 2016, "source": "road", "t": 60,
+     "published_pct": 0.75},
+]  # fmt: skip
+
+
+def pooled_shares(bg: pd.DataFrame, by=("year", "source")) -> pd.DataFrame:
+    """Population-weighted percent of residents at or above each threshold."""
+    by = list(by)
+    cols = [c for c in bg.columns if c.startswith("pop_share_ge_")]
+    w = bg[cols].mul(bg["pop20"], axis=0).assign(pop20=bg["pop20"], **{k: bg[k] for k in by})
+    g = w.groupby(by).sum()
+    out = 100 * g[cols].div(g["pop20"], axis=0)
+    out.columns = [int(c.rsplit("_", 1)[1]) for c in cols]
+    return out
+
+
+def reconcile(bg: pd.DataFrame) -> pd.DataFrame:
+    ours = pooled_shares(bg)
+    rows = []
+    for b in BENCHMARKS:
+        v = ours.loc[(b["year"], b["source"]), b["t"]]
+        rows.append({**b, "our_20_metros_pct": round(float(v), 2)})
+    return pd.DataFrame(rows)
+
+
+def main(argv=None):
+    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    p.add_argument("--metro", help="one CBSA code (default: every metro)")
+    p.add_argument("--years", type=int, nargs="*")
+    p.add_argument("--workers", type=int, default=2)
+    p.add_argument("--overwrite", action="store_true")
+    a = p.parse_args(argv)
+    if a.metro:
+        run_metro(a.metro, a.years)
+    else:
+        bg = run_all(a.workers, a.overwrite, a.years)
+        print(f"{PROCESSED.relative_to(config.ROOT)}: {len(bg):,} rows")
+
+
+if __name__ == "__main__":
+    main()

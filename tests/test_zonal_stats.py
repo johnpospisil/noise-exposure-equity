@@ -141,3 +141,55 @@ def test_block_stats_from_raster(tmp_path):
     assert out.loc["b1", "share_ge_45"] == 0.75
     assert out.loc["b2", "share_ge_45"] == 0.5  # half on 50 dB, half on a censored cell
     assert out.loc["b2", "cells"] == 1.0
+
+
+def test_combine_rasters_in_strips_matches_whole(tmp_path):
+    rng = np.random.default_rng(0)
+    a = np.where(rng.random((7, 5)) < 0.3, -9999, rng.uniform(45, 80, (7, 5)))
+    b = np.where(rng.random((7, 5)) < 0.5, -9999, rng.uniform(45, 80, (7, 5)))
+    ra = _write(tmp_path / "a.tif", a, 0, 210)
+    rb = _write(tmp_path / "b.tif", b, 10, 205)
+    bounds = (0, 0, 150, 210)
+    whole = zs.combine_rasters([ra, rb], tmp_path / "w.tif", bounds, strip_rows=1000)
+    strips = zs.combine_rasters([ra, rb], tmp_path / "s.tif", bounds, strip_rows=2)
+    with rasterio.open(whole) as w, rasterio.open(strips) as s:
+        np.testing.assert_array_equal(w.read(1), s.read(1))
+        assert s.height == 7
+
+
+def test_pooled_shares_weight_block_groups_by_population():
+    bg = pd.DataFrame(
+        {
+            "year": [2022, 2022],
+            "source": ["road", "road"],
+            "pop20": [100, 300],
+            "pop_share_ge_55": [0.4, 0.0],
+        }
+    )
+    out = zs.pooled_shares(bg)
+    assert out.loc[(2022, "road"), 55] == pytest.approx(10.0)
+
+
+# --- real output ----------------------------------------------------------------------
+
+
+@pytest.mark.skipif(not zs.PROCESSED.exists(), reason="zonal stats not run")
+def test_processed_bg_noise():
+    bg = pd.read_parquet(zs.PROCESSED)
+    assert not bg.duplicated(["year", "source", "bg_geoid"]).any()
+    road = bg[bg["source"] == "road"]
+    assert road.groupby("year")["bg_geoid"].nunique().eq(85_392).all()
+    shares = bg[[f"pop_share_ge_{t}" for t in zs.THRESHOLDS]]
+    assert ((shares >= 0) & (shares <= 1 + 1e-6) | shares.isna()).all().all()
+    # higher thresholds never cover more residents
+    assert (shares.diff(axis=1).iloc[:, 1:].fillna(0) <= 1e-6).all().all()
+    # combining sources never lowers exposure below the loudest single source. Exactly so
+    # in 2022 (one grid per state); 2016-2020 aviation is resampled onto the road grid
+    # (nearest neighbour, up to half a cell), which moves a few block groups slightly.
+    # Blocks reaching past a state raster's edge count that strip as quiet area in the
+    # combined raster only (tiny effect, hence the 1e-3 tolerance in 2022).
+    w = bg.pivot_table(index=["year", "bg_geoid"], columns="source", values="pop_share_ge_55")
+    gap = w[["road", "aviation"]].max(axis=1) - w["road_aviation"]
+    ok = gap <= 1e-6
+    assert (gap.xs(2022) <= 1e-3).all()
+    assert ok.mean() > 0.995

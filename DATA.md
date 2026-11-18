@@ -173,3 +173,47 @@ Deferred to P12. Candidates: Urban Displacement Project (tract typology), NYU Fu
 ## 10. EPA EJScreen
 
 Skipped (decision 2026-11-17).
+
+---
+
+# Derived datasets
+
+## `data/processed/bg_noise.parquet` (P07–P08)
+
+Block-group noise exposure for the 20 metros, built by `ne.build.zonal_stats` (`make build`).
+**Derived from:** BTS National Transportation Noise Map (2016, 2018, 2020, 2022) and 2020 Census blocks and block groups (TIGER/Line, `POP20`). Public domain inputs; no NHGIS.
+
+- 1,534,199 rows: 85,392 block groups (2020 boundaries) × year × source. 45 MB (float32, zstd).
+- Sources:
+  - `road`, `aviation`, `rail` (2018–2022);
+  - `road_aviation`, comparable over time;
+  - `all` (2018–2022).
+  - Combined sources are energy sums at the cell level, on each state's road grid (nearest neighbour). A censored source adds nothing.
+- Columns:
+  - `pop_share_ge_{45,50,55,60,65,70}`: share of residents in blocks at or above each level. Block area shares are weighted by 2020 block population.
+  - `area_share_ge_*`: the same shares weighted by area, for the P15 robustness check.
+  - `median_db`: population-weighted median of block medians. NaN when it is below 45 dBA.
+  - `emean_cap100_db`: population-weighted energy mean, capped at 100 dB (sensitivity only).
+  - `pop20`, `cells` (30 m cells, coverage-weighted).
+- Run: 48 min on 2 workers; peak 4.4 GB. Each metro has its own logs in `data/interim/zonal/{cbsa}/`.
+
+**Reconciliation** (`data/processed/bts_reconciliation.csv`). Figures are the percent of residents at or above each level.
+
+| Benchmark | Our 20 metros | Published (national) |
+|---|---|---|
+| UW DEOHS, 2020 map, all sources, ≥ 45 dB | 35.5% | 29.1% |
+| UW DEOHS, 2020 map, all sources, ≥ 60 dB | 3.5% | 3.6% |
+| BTS, 2014 map, aviation, ≥ 50 / ≥ 60 dB (ours: 2016) | 7.0 / 0.4% | 2.9 / 0.2% |
+| BTS, 2014 map, Interstates only, ≥ 50 / ≥ 60 dB (ours: 2016, all mapped roads) | 10.7 / 2.2% | 2.1 / 0.8% |
+
+- Large metros are noisier than the national average at low levels, and match it at 60 dB.
+- The 2014 BTS table covered Interstates only, and an earlier aviation model, so it is an order-of-magnitude check, not a match.
+
+**Known issues**
+- **Which roads BTS models changes between releases.** Mapped road cells:
+  - Georgia: 6.6M (2016) → 4.2M (2018).
+  - Minnesota: 3.6M → 1.9M → 3.0M.
+  - The 2022 road layer (v3, 2023 HPMS data) gives lower shares in San Francisco, San Diego and Los Angeles than 2020 did.
+- Rail is passenger-only in 2018, and extra lines appear in 2022 (San Francisco, San Diego, Boston).
+- So year-to-year differences mix real change with changes in the model's inputs.
+- In 2016–2020, aviation is resampled onto the road grid (up to half a 30 m cell). As a result, `road_aviation` falls slightly below `aviation` in 0.2% of block groups, typically by under 1 percentage point.

@@ -52,6 +52,7 @@ Sizes marked † were **measured live on 2026-11-17**. Sizes marked ~ are estima
 - **311 complaint counts are dominated by a few locations** (one Bronx building filed 25% of 2025 residential complaints) and include app double-submits. Complaint models must not use raw counts alone; see the P05 question on location-days.
 - **The rail layers do not include the NYC subway** (including elevated lines). Say so in the NYC section.
 - Rail and aviation values reach ~125 dB on track lines and runways (model ceiling); see the P03 question on capping for energy means.
+- **BTS changes which roads it models between releases** (Georgia's road cells fall by a third from 2016 to 2018; Minnesota's halve, then recover). Year-to-year differences are partly model-input changes, not real change (P08).
 - The 2020 inputs reflect COVID-era traffic. Note this whenever 2018 and 2020 are compared.
 
 ### Data licences
@@ -132,7 +133,7 @@ noise-exposure-equity/
   **Deliverables:** pilot BG table, validation table, map PNG of the pilot metro, runtime estimate for scaling up.
   **Questions:** Which pilot metro (default: New York, since it feeds the NYC analysis; or a smaller one like Atlanta for speed)? Is block-population weighting enough, or also mask to NLCD developed land?
 
-- [ ] **P08: Scale to all metros and years.**
+- [x] ✅ DONE! **P08: Scale to all metros and years.** _Done 2026-11-17: 20 metros × 4 years → bg_noise.parquet (1.53M rows, 45 MB) in 48 min; matches UW's 2020 national ≥ 60 dB share (3.5% vs 3.6%); BTS road coverage changes between releases flagged; 101 tests pass._
   Run P07 for every metro and release year, parallel by metro window, with caching and resume. Compare national totals with BTS's own published exposure statistics (e.g. "share of population exposed ≥ 50/60 dBA").
   **Deliverables:** `data/processed/bg_noise.parquet`; reconciliation table against BTS figures; run log.
   **Questions:** Any metros with odd results to look into before modelling?
@@ -150,7 +151,7 @@ noise-exposure-equity/
   **Questions:** Headline threshold 65 dBA (spec) or 55? Visual style and palette preferences?
 
 - [ ] **P11: Regression and spatial models; change over time.**
-  `models/spatial_reg.py`: OLS with metro fixed effects, then spatial lag/error models (PySAL `spreg`, Queen weights within metro), Moran's I on residuals. Change over time 2016→2018→2020 (road + aviation) by group.
+  `models/spatial_reg.py`: OLS with metro fixed effects, then spatial lag/error models (PySAL `spreg`, Queen weights within metro), Moran's I on residuals. Change over time (road + aviation) by group, as a **short descriptive box only** (decision P08: BTS model inputs change between releases).
   **Deliverables:** coefficient tables, LM diagnostics, change-over-time table and chart, short interpretation.
   **Questions:** Run spatial models per metro, pooled, or both? How much of the change-over-time analysis goes into the article?
 
@@ -218,6 +219,9 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17 (P04): **Income quintiles within each metro** (spec), built in P09. **ACS reliability: flag and keep** block groups with missing income or CV > 0.30 (`acs_cv_flag`); drop them as a P15 robustness check.
 - 2026-11-17 (P06): **Metric offsets**: road and aviation Lden = LAeq24 + 3, Lnight = LAeq24 − 7; rail +5 / −2 (freight runs at night). Assumptions, tested in P15.
 - 2026-11-17 (P06): **Health headline = extra cases above the WHO guideline level**; total cases above the curve's lower limit reported alongside (P14).
+- 2026-11-17 (P08): **2022 cross-section is the headline.** Change over time is cut to a short descriptive box with a caveat on BTS model-input changes (no consistent-footprint analysis).
+- 2026-11-17 (P08): `bg_noise.parquet`, `metro_exposure.csv` and `bts_reconciliation.csv` are **committed to GitHub** (BTS + Census only, public domain; sources listed in `data/processed/README.md`). Anything built with ACS or 311 is checked case by case.
+- 2026-11-17 (P08): Exposure thresholds extended to **45/50/55/60/65/70 dBA** (50 and 60 for the BTS and UW benchmarks).
 - 2026-11-17 (P07): **Road results are "major-road noise"** everywhere they are reported: the BTS road model covers highways and arterials, not local streets (only 27% of New York metro residents are in blocks with any road noise ≥ 45 dBA).
 - 2026-11-17 (P07): Pilot metro = **New York**; block-population weighting, no NLCD mask. Sources are combined per cell on each state's road grid (nearest neighbour), and a censored source adds nothing (`policy="zero"`). Sources: road, aviation, rail, `road_aviation` (comparable over time), `all` (years with rail).
 - 2026-11-17 (P06): **Primary ERFs = WHO 2018** (Guski 2017 %HA, Basner & McGuire 2018 %HSD, as in Directive (EU) 2020/367). Censored-cell floor 45 dB; sensitivity 40 dB and zero contribution.

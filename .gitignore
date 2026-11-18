@@ -3,6 +3,11 @@ data/raw/*
 data/interim/*
 data/processed/*
 !data/**/.gitkeep
+# small public-domain derived tables (BTS + Census only; never NHGIS)
+!data/processed/README.md
+!data/processed/bg_noise.parquet
+!data/processed/metro_exposure.csv
+!data/processed/bts_reconciliation.csv
 
 # Secrets
 .env

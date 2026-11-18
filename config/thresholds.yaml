@@ -1,6 +1,6 @@
 # Noise thresholds, LAeq,24h in dBA (the BTS map metric).
 # The BTS rasters omit cells below 45 dBA (left-censored).
-exposure_thresholds_dba: [45, 55, 65, 70]
+exposure_thresholds_dba: [45, 50, 55, 60, 65, 70]  # 50 and 60 for benchmarks (BTS 2014 table, UW 2020)
 headline_threshold_dba: 65
 secondary_threshold_dba: 55
 
