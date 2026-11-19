@@ -89,3 +89,10 @@ def test_panel_output():
     assert (p["location_days"] <= p["complaints"]).all()
     assert set(p["tract"]) == set(tr["tract"])
     assert tr["tract"].str[:5].isin(npn.NYC_COUNTIES).all()
+
+
+def test_typology_with_income_growth_instead_of_rent():
+    t = _tracts().assign(income_end=[45, 31, 41, 85, 55, 20])  # A grows 50 %, others <= 10 %
+    out = npn.typology(t, growth="income").set_index("tract")["typology"]
+    assert out["A"] == "Low-income, gentrifying"
+    assert out["C"] == "Low-income, not gentrifying"  # BA up but income growth 2.5 %

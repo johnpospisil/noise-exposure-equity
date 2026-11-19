@@ -105,17 +105,17 @@ def tract_acs(end_year: int) -> pd.DataFrame:
     )
 
 
-def typology(t: pd.DataFrame) -> pd.DataFrame:
-    """Classify tracts. Needs ``pop_base``, ``income_base``, ``ba_share_base/_end``,
-    ``rent_base/_end``."""
+def typology(t: pd.DataFrame, growth: str = "rent") -> pd.DataFrame:
+    """Classify tracts. Needs ``pop_base``, ``income_base``, ``ba_share_base/_end`` and
+    ``rent_base/_end`` (or ``income_end`` with ``growth="income"``, the P15 variant)."""
     t = t.copy()
     t["d_ba"] = t["ba_share_end"] - t["ba_share_base"]
-    t["g_rent"] = t["rent_end"] / t["rent_base"] - 1
-    cols = ["income_base", "d_ba", "g_rent"]
+    t["g_growth"] = t[f"{growth}_end"] / t[f"{growth}_base"] - 1
+    cols = ["income_base", "d_ba", "g_growth"]
     ok = (t["pop_base"] >= MIN_POP) & t[cols].notna().all(axis=1)
     med = t.loc[ok, cols].median()
     eligible = t["income_base"] <= med["income_base"]
-    gent = eligible & (t["d_ba"] > med["d_ba"]) & (t["g_rent"] > med["g_rent"])
+    gent = eligible & (t["d_ba"] > med["d_ba"]) & (t["g_growth"] > med["g_growth"])
     t["typology"] = np.select(
         [~ok, gent, eligible], TYPOLOGY[3:4] + TYPOLOGY[:2], default=TYPOLOGY[2]
     )
@@ -201,7 +201,8 @@ def build_tracts() -> tuple[gpd.GeoDataFrame, pd.DataFrame]:
         .merge(tract_noise(), on="tract", how="left")
         .merge(demo.rename(columns={"pop": "acs_pop", "income": "med_hh_income",
                                     "rent": "med_gross_rent"}), on="tract", how="left")
-        .merge(ty[["tract", "typology", "d_ba", "g_rent"]], on="tract", how="left")
+        .merge(ty[["tract", "typology", "d_ba", "g_growth"]].rename(
+            columns={"g_growth": "g_rent"}), on="tract", how="left")
     )  # fmt: skip
     t["typology"] = t["typology"].fillna("Too few residents")
     t.insert(1, "borough", t["tract"].str[:5].map(NYC_COUNTIES))

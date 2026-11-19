@@ -13,6 +13,7 @@ Small analysis-ready tables. Each one lists its sources. Raw and interim data ar
 | `nyc_panel.parquet`, `nyc_tracts.parquet` | `make build` (`ne.build.nyc_panel`) | NYC Open Data 311 (`76ig-c548`, `erm2-nwe9`), tract-level counts only; BTS 2022; Census 2020 blocks and tracts; ACS 5-year 2016–20, 2018–22, 2020–24 (tracts) |
 | `complaints_nb_models.csv`, `complaints_nb_margins.csv` | `make models` (`ne.models.complaints_nb`) | as `nyc_panel.parquet` / `nyc_tracts.parquet` |
 | `health_estimates.csv`, `health_by_income.csv` | `make models` (`ne.models.health`) | as the disparity tables, plus WHO 2018 exposure-response functions (Guski et al. 2017; Basner & McGuire 2018) |
+| `robustness_grid.csv` | `make models` (`ne.models.robustness`) | all of the above |
 
 All values come from **modelled noise, not measured noise**. BTS says the map should not be used to judge noise at individual locations. Results describe neighbourhoods, not individuals.
 

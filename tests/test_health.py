@@ -48,3 +48,19 @@ def test_low_and_high_scenarios_bracket_central():
     vals = {s: h.cases(bg, "aviation", "HSD", scenario=s)["excess"].sum() for s in h.SCENARIOS}
     assert vals["low"] <= vals["central"] <= vals["high"]
     assert vals["low"] < vals["high"]
+
+
+def test_residents_below_45_can_be_placed_at_a_floor():
+    bg = _bg()  # everyone below 45 dBA
+    assert h.cases(bg, "aviation", "HA")["total"].sum() == 0
+    c = h.cases(bg, "aviation", "HA", below45=42.5)
+    lden = 42.5 + 3.0  # aviation Lden 45.5 is above the 45 dB guideline
+    assert c["total"].sum() == pytest.approx(1000 * erf.pct_ha(lden, "aviation") / 100)
+    assert c["excess"].sum() > 0
+
+
+def test_extra_offset_shift_moves_estimates():
+    bg = _bg(pop_share_ge_45=1, pop_share_ge_50=1)
+    base = h.cases(bg, "rail", "HSD")["excess"].sum()
+    up = h.cases(bg, "rail", "HSD", extra_shift=2.0)["excess"].sum()
+    assert up > base

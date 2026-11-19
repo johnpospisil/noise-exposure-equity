@@ -24,7 +24,7 @@ models:  ## Disparity, spatial and complaint models (P10-P15)
 	$(PY) -W ignore ne.models.spatial_reg
 	$(PY) -W ignore ne.models.complaints_nb
 	$(PY) ne.models.health
-	@echo "TODO (P15): robustness"
+	$(PY) -W ignore ne.models.robustness
 
 figures:  ## Make all charts (P10-P16)
 	$(PY) ne.viz.qa

@@ -174,7 +174,7 @@ noise-exposure-equity/
   **Deliverables:** estimates table, Chart 5, caveat text block.
   **Questions:** Show ranges or point estimates in the headline numbers?
 
-- [ ] **P15: Robustness suite.**
+- [x] ✅ DONE! **P15: Robustness suite.** _Done 2026-11-19: 72 checks; disparity ratios never flip (income 1.9–2.4×); NYC gentrification result holds except with raw counts; spec C income sign depends on spatial terms; aircraft health estimate is a lower bound (8.3M if residents below 45 dBA sit at 45); 131 tests pass._
   Alternative thresholds; area- vs population-weighting; censoring floor; excluding Manhattan; complaint types separately; ACS MOE filtering; with/without spatial terms. One summary "robustness grid" table.
   **Deliverables:** robustness grid, list of any results that change sign or significance.
   **Questions:** Any robustness checks to add or drop?
@@ -222,6 +222,8 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17 (P09): Race/ethnicity groups: NH White, NH Black, Hispanic, NH Asian, other (other races + multiracial). `analysis_bg.parquet` stays local (49.6 MB, rebuilt by `make build`); result tables from P10 on are committed.
 - 2026-11-19 (P13): **NYC section is exploratory.** Main point: gentrifying tracts complain 14% more than other low-income tracts with the same modelled noise and demographics; complaints barely follow modelled noise. Caveats: 311 measures reporting; BTS misses most complaint sources.
 - 2026-11-19 (P14): **Health ranges stay assumption ranges** (band position, conversion offsets ±2 dB); the curves' published confidence intervals are not coded, and the text says so.
+- 2026-11-19 (P15): Aircraft health headline is worded **"at least 2.9 million"** (the WHO aircraft guideline sits below the map's 45 dBA floor; methods explain why).
+- 2026-11-19 (P16): Bivariate map features **New York** with **income**.
 - 2026-11-19 (P15): Robustness set = spec list + alternative gentrification definition (income growth instead of rent), ±2 dB on the rail night offset, 2020 map instead of 2022.
 - 2026-11-19 (P14): Health headline = **point estimates with ranges beside them**, counting extra cases above the WHO guideline levels.
 - 2026-11-19 (P12): **Helicopter complaints are left out of the complaint models** (BTS aviation models airports, not helicopter routes; tract ρ = −0.18); reported descriptively. Models cover residential, street, vehicle and commercial complaints.

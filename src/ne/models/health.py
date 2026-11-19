@@ -62,12 +62,25 @@ def bands(bg: pd.DataFrame) -> pd.DataFrame:
     return pd.concat(parts, ignore_index=True)
 
 
-def cases(bg: pd.DataFrame, source: str, outcome: str, scenario: str = "central"):
-    """Per block group × band: estimated total and excess cases for one source/outcome."""
+def cases(bg: pd.DataFrame, source: str, outcome: str, scenario: str = "central",
+          below45: float | None = None, extra_shift: float = 0.0):  # fmt: skip
+    """Per block group × band: estimated total and excess cases for one source/outcome.
+
+    ``below45``: place residents below 45 dBA at this LAeq,24h level (P15 floor checks;
+    default: no cases). ``extra_shift``: added to the conversion offset (P15).
+    """
     to_metric, curve, offset_key = OUTCOMES[outcome]
     level_col, shift = SCENARIOS[scenario]
     b = bands(bg)
+    if below45 is not None:
+        keep = [c for c in b.columns if c not in ("band_lo", "band_hi", "mid", "residents")]
+        first = b.drop_duplicates("bg_geoid") if "bg_geoid" in b else b.iloc[: len(bg)]
+        under = (1 - bg["pop_share_ge_45"].to_numpy()) * bg["pop20"].to_numpy()
+        low = first[keep].assign(band_lo=below45, band_hi=below45, mid=below45,
+                                 residents=under.clip(min=0))  # fmt: skip
+        b = pd.concat([low, b], ignore_index=True)
     offset = float(config.thresholds()["metric_offsets_db"][source][offset_key]) + shift
+    offset += extra_shift
     metric = getattr(erf, to_metric)(b[level_col].to_numpy(float), source, offset=offset)
     pct = np.asarray(getattr(erf, curve)(metric, source))
     guide = WHO_GUIDELINE[outcome][source]
