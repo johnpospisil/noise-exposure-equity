@@ -21,7 +21,8 @@ build:  ## Zonal stats and analysis tables (P06-P09, P12)
 
 models:  ## Disparity, spatial and complaint models (P10-P15)
 	$(PY) ne.models.disparity
-	@echo "TODO (P11-P15): spatial_reg / complaints_nb / health"
+	$(PY) -W ignore ne.models.spatial_reg
+	@echo "TODO (P13-P15): complaints_nb / health / robustness"
 
 figures:  ## Make all charts (P10-P16)
 	$(PY) ne.viz.qa

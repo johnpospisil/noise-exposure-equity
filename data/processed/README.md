@@ -8,6 +8,8 @@ Small analysis-ready tables. Each one lists its sources. Raw and interim data ar
 | `metro_exposure.csv` | `ne.build.zonal_stats.pooled_shares` | same as above |
 | `bts_reconciliation.csv` | `ne.build.zonal_stats.reconcile` | same as above, plus published figures from UW DEOHS (2020 map) and BTS (2014 map) |
 | `disparity_income.csv`, `disparity_race.csv` | `make models` (`ne.models.disparity`) | BTS National Transportation Noise Map; Census 2020 blocks (`POP20`); ACS 5-year (B19013 income, B03002 race/ethnicity) via the Census API |
+| `spatial_models_pooled.csv`, `spatial_models_metro.csv`, `spatial_lm_diagnostics.csv` | `make models` (`ne.models.spatial_reg`) | as above, plus TIGER/Line 2020 block groups (contiguity, land area) |
+| `change_over_time.csv` | `ne.models.spatial_reg.change_over_time` | as the disparity tables (BTS 2016–2022, ACS 2016–20 and 2018–22) |
 
 All values come from **modelled noise, not measured noise**. BTS says the map should not be used to judge noise at individual locations. Results describe neighbourhoods, not individuals.
 

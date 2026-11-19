@@ -9,6 +9,8 @@ data/processed/*
 !data/processed/metro_exposure.csv
 !data/processed/bts_reconciliation.csv
 !data/processed/disparity_*.csv
+!data/processed/spatial_*.csv
+!data/processed/change_over_time.csv
 
 # Secrets
 .env
