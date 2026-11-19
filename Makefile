@@ -1,4 +1,4 @@
-.PHONY: help setup ingest build models figures report test lint all clean-interim
+.PHONY: help setup ingest build models figures report app site test lint all clean-interim
 
 PY := uv run python -m
 
@@ -30,6 +30,16 @@ figures:  ## Make all charts (P10-P16)
 	$(PY) ne.viz.qa
 	$(PY) ne.viz.figures
 	$(PY) ne.viz.maps
+
+app:  ## Build the address-lookup app data (P18)
+	$(PY) ne.build.app_data
+
+site: report app  ## Assemble the GitHub Pages site in _site/ (P18-P19)
+	rm -rf _site && mkdir -p _site/report _site/app _site/map
+	cp report/_output/index.html _site/report/index.html
+	cp -R app/index.html app/app.js app/style.css app/data _site/app/
+	cp figures/chart2_bivariate_nyc.html _site/map/index.html
+	cp site_index.html _site/index.html
 
 report:  ## Render the Quarto report (P17)
 	$(PY) ne.report

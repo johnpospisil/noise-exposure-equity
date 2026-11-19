@@ -1,0 +1,102 @@
+:root {
+  --surface: #fcfcfb;
+  --card: #ffffff;
+  --ink: #1f1f1e;
+  --ink-2: #4a4945;
+  --muted: #6b6a66;
+  --line: #e4e2dd;
+  --accent: #184f95;
+  --accent-soft: #e8f0fb;
+  --road: #2a78d6;
+  --rail: #eb6834;
+  --aviation: #1baf7a;
+  --all: #0d366b;
+  --warn-bg: #fbf6ec;
+  --warn-line: #e3c98f;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface: #1a1a19; --card: #232321; --ink: #f0efec; --ink-2: #d6d4cd; --muted: #a9a7a0;
+    --line: #3a3936; --accent: #86b6ef; --accent-soft: #1f2a3a; --road: #3987e5;
+    --rail: #d95926; --aviation: #199e70; --all: #86b6ef; --warn-bg: #2a2619; --warn-line: #6d5a2c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --surface: #1a1a19; --card: #232321; --ink: #f0efec; --ink-2: #d6d4cd; --muted: #a9a7a0;
+  --line: #3a3936; --accent: #86b6ef; --accent-soft: #1f2a3a; --road: #3987e5;
+  --rail: #d95926; --aviation: #199e70; --all: #86b6ef; --warn-bg: #2a2619; --warn-line: #6d5a2c;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--surface); color: var(--ink);
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; }
+.kicker { color: var(--muted); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; margin: 0 0 6px; }
+h1 { font-size: clamp(26px, 5vw, 34px); line-height: 1.15; margin: 0 0 12px; }
+h2 { font-size: 17px; margin: 28px 0 10px; }
+.lede { color: var(--ink-2); margin: 0 0 24px; }
+
+form label { display: block; font-weight: 600; margin-bottom: 6px; }
+.row { display: flex; gap: 8px; }
+input {
+  flex: 1; min-width: 0; font: inherit; padding: 11px 12px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink);
+}
+input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button {
+  font: inherit; font-weight: 600; padding: 11px 18px; border-radius: 8px; border: 0;
+  background: var(--accent); color: var(--surface); cursor: pointer;
+}
+button:disabled { opacity: .6; cursor: progress; }
+.privacy { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
+#status { min-height: 1.5em; color: var(--ink-2); margin: 16px 0; }
+
+#result {
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px;
+}
+.matched { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+.headline { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+.big { font-size: 48px; font-weight: 700; line-height: 1; margin: 0; color: var(--all); }
+.headline p:last-child { margin: 0; flex: 1; min-width: 220px; }
+
+.rank { margin: 22px 0 6px; }
+.rank-track {
+  position: relative; height: 10px; border-radius: 5px;
+  background: linear-gradient(90deg, #cde2fb, #2a78d6 60%, #0d366b);
+}
+.rank-marker {
+  position: absolute; top: -5px; width: 4px; height: 20px; margin-left: -2px; border-radius: 2px;
+  background: var(--ink); box-shadow: 0 0 0 2px var(--card);
+}
+.rank-scale { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; margin-top: 6px; }
+#rank-text { margin: 4px 0 0; }
+
+table.sources { width: 100%; border-collapse: collapse; font-size: 15px; }
+.sources th { text-align: left; color: var(--muted); font-weight: 600; font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.sources td { padding: 8px 0; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.sources .num { text-align: right; white-space: nowrap; }
+.bar { display: flex; align-items: center; gap: 8px; }
+.bar-track { flex: 1; height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; max-width: 260px; }
+.bar-fill { height: 100%; border-radius: 4px; }
+.bar-val { min-width: 48px; font-variant-numeric: tabular-nums; }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; }
+.context { color: var(--ink-2); font-size: 14px; margin: 16px 0 0; }
+
+.caveat {
+  margin-top: 28px; background: var(--warn-bg); border: 1px solid var(--warn-line);
+  border-radius: 12px; padding: 4px 20px 16px;
+}
+.caveat ul { padding-left: 20px; margin: 0; }
+.caveat li { margin: 6px 0; }
+.sources-note { color: var(--muted); font-size: 13px; margin-top: 12px; }
+a { color: var(--accent); }
+
+@media (max-width: 480px) {
+  .row { flex-direction: column; }
+  .big { font-size: 40px; }
+}

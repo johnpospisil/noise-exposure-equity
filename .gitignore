@@ -46,3 +46,6 @@ figures/qa/
 # Rendered report (rebuilt by `make report`)
 report/_output/
 report/.quarto/
+
+# Assembled GitHub Pages site (make site)
+/_site/

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How loud is my neighbourhood?</title>
+  <meta name="description" content="Modelled road, rail and aircraft noise for neighbourhoods in the 20 largest US metro areas.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="kicker">Loud and Unequal · neighbourhood lookup</p>
+      <h1>How loud is my neighbourhood?</h1>
+      <p class="lede">Enter an address in one of the 20 largest US metro areas. You'll see how many of
+        your neighbourhood's residents live with modelled transportation noise of 55&nbsp;dBA or more.
+        That is roughly the level of a busy street, averaged over the whole day and night.</p>
+    </header>
+
+    <form id="lookup" autocomplete="street-address">
+      <label for="address">Street address</label>
+      <div class="row">
+        <input id="address" name="address" type="text" required
+               placeholder="e.g. 1 E 161st St, Bronx, NY 10451">
+        <button type="submit">Look up</button>
+      </div>
+      <p class="privacy">Your address goes only to the U.S. Census Bureau's public geocoder, to find
+        your census block group. This page stores nothing.</p>
+    </form>
+
+    <p id="status" role="status" aria-live="polite"></p>
+
+    <section id="result" hidden>
+      <p class="matched" id="matched"></p>
+      <div class="headline">
+        <p class="big" id="big"></p>
+        <p id="big-text"></p>
+      </div>
+
+      <div class="rank" aria-hidden="true">
+        <div class="rank-track"><div class="rank-marker" id="rank-marker"></div></div>
+        <div class="rank-scale"><span>quieter</span><span>louder</span></div>
+      </div>
+      <p id="rank-text"></p>
+
+      <h2>By source</h2>
+      <table class="sources" id="sources">
+        <thead><tr><th scope="col">Source</th><th scope="col">Residents ≥ 55 dBA</th>
+          <th scope="col" class="num">≥ 65 dBA</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <p class="context">Noise from different sources adds up, so the combined figure can be higher
+        than any single source. Two sources that are each just under 55&nbsp;dBA can exceed it together.</p>
+      <p class="context" id="context"></p>
+    </section>
+
+    <aside class="caveat">
+      <h2>Read this first</h2>
+      <ul>
+        <li><strong>Modelled, not measured.</strong> These are estimates from the U.S. Bureau of
+          Transportation Statistics' National Transportation Noise Map (2022). Nobody measured the noise at your door.</li>
+        <li><strong>Your neighbourhood, not your home.</strong> Results describe the census block group
+          (about 1,500 people) your address falls in. BTS says its map should not be used to judge
+          noise at individual locations.</li>
+        <li><strong>Not all noise.</strong> Road means major roads only. Rail does not include subways.
+          Neighbours, construction and nightlife are not included.</li>
+      </ul>
+      <p class="sources-note">Sources: BTS National Transportation Noise Map (2022); U.S. Census Bureau
+        (2020 Census; ACS 2018–22); address matching by the Census Geocoder.
+        <a href="../report/index.html">Read the full analysis</a>.</p>
+    </aside>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

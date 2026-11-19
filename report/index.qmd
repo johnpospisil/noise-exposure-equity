@@ -83,7 +83,7 @@ each metro.
 
 ### What it looks like on the ground
 
-![New York: modelled noise × median household income. Darkest blue = loud and lower-income. [Interactive version](../figures/chart2_bivariate_nyc.html).](../figures/chart2_bivariate_nyc.png){#fig-map .column-page}
+![New York: modelled noise × median household income. Darkest blue = loud and lower-income. [Interactive version](../map/).](../figures/chart2_bivariate_nyc.png){#fig-map .column-page}
 
 In New York, the loud, lower-income neighbourhoods (darkest blue) cluster in a few places:
 the South Bronx and Upper Manhattan along the expressways and rail lines, central Brooklyn,
@@ -281,6 +281,10 @@ throughout. The full grid is `data/processed/robustness_grid.csv`.
 - Basemap for the interactive map: Esri, HERE, Garmin, © OpenStreetMap contributors.
 
 No IPUMS NHGIS data were used.
+
+## Look up your neighbourhood
+
+The [neighbourhood lookup](../app/) shows the same 2022 estimates for any address in the 20 metros.
 
 ## Reproduce it
 

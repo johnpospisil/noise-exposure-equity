@@ -191,7 +191,7 @@ noise-exposure-equity/
   **Deliverables:** rendered HTML report, word count, list of claims with the table/figure behind each one.
   **Questions:** Where will it be published (personal site, Medium, Substack, GitHub Pages)? Audience and tone?
 
-- [ ] **P18: Address lookup app.**
+- [x] ✅ DONE! **P18: Address lookup app.** _Done 2026-11-19: static page (Census Geocoder via JSONP → 2020 block group → per-state JSON, 5.6 MB) with neighbourhood share ≥ 55/65 dBA by source, within-metro percentile and caveats; tested end to end on desktop and mobile; `make site` assembles report + app + map for GitHub Pages; 140 tests pass._
   `app/`: enter an address → geocode (Census Geocoder, free) → modelled noise by source at that point plus the BG's percentile in its metro. Pre-computed BG lookup + sampled raster values or tiled COG reads; clear "modelled, not measured" disclaimer.
   **Deliverables:** working local app, screenshots, deployment plan.
   **Questions:** Framework and hosting (static site + pre-computed tiles vs Streamlit / FastAPI)? Metros covered only, or national?
