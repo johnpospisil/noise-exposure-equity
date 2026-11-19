@@ -157,7 +157,7 @@ noise-exposure-equity/
 
 ### Phase 4: NYC complaints vs exposure (Week 4)
 
-- [ ] **P12: NYC tract × month panel.**
+- [x] ✅ DONE! **P12: NYC tract × month panel.** _Done 2026-11-19: 2,327 tracts × 130 months × 8 groups (6.97M complaints, 5.0M location-days); own ACS gentrification typology (299 gentrifying tracts); gentrifying tracts file the most complaints per resident (64 location-days per 1,000 a year vs 45 in higher-income tracts); 119 tests pass._
   `build/nyc_panel.py`: complaints by tract × month × type (spatial join), tract modelled noise (from P08), ACS demographics, gentrification typology, population, borough.
   **Deliverables:** `data/processed/nyc_panel.parquet`, summary of complaints per 1,000 residents by typology, panel QA.
   **Questions:** Which gentrification typology (Urban Displacement Project, Furman Center, or our own ACS-change definition)? Tract or NTA level?
@@ -220,6 +220,8 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17 (P06): **Metric offsets**: road and aviation Lden = LAeq24 + 3, Lnight = LAeq24 − 7; rail +5 / −2 (freight runs at night). Assumptions, tested in P15.
 - 2026-11-17 (P06): **Health headline = extra cases above the WHO guideline level**; total cases above the curve's lower limit reported alongside (P14).
 - 2026-11-17 (P09): Race/ethnicity groups: NH White, NH Black, Hispanic, NH Asian, other (other races + multiracial). `analysis_bg.parquet` stays local (49.6 MB, rebuilt by `make build`); result tables from P10 on are committed.
+- 2026-11-19 (P12): **Helicopter complaints are left out of the complaint models** (BTS aviation models airports, not helicopter routes; tract ρ = −0.18); reported descriptively. Models cover residential, street, vehicle and commercial complaints.
+- 2026-11-19 (P12): **Gentrification typology = our own**, ACS 2016–20 → 2020–24 on 2020 tracts (income ≤ city median; BA+ gain and rent growth above the city median). Tract level, not NTA. Panel window 2016-01 → 2026-10. `nyc_panel.parquet` and `nyc_tracts.parquet` are committed (tract-level counts only).
 - 2026-11-17 (P11): **Framing**: lead with the descriptive income and race gaps (P10); present renting and density as part of how the gap arises, not as something that cancels it.
 - 2026-11-17 (P11): Spatial models: pooled with metro fixed effects (within-metro demeaning, since lagged metro dummies equal the dummies) as the main result, plus one model per metro. GM estimators (2SLS lag, heteroskedasticity-robust error); Queen contiguity within metros; islands dropped.
 - 2026-11-17 (P10): **Headline threshold 55 dBA**; 65 dBA is shown as the stricter test (changed from the spec after seeing the results: 65 dBA shares are 0.3–3%). Palette = `theme.py` blue ramp for quintiles, reference categorical slots 1–5 for race (validator: all checks pass; contrast relief via direct axis labels).

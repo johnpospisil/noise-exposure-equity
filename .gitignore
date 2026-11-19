@@ -11,6 +11,8 @@ data/processed/*
 !data/processed/disparity_*.csv
 !data/processed/spatial_*.csv
 !data/processed/change_over_time.csv
+!data/processed/nyc_panel.parquet
+!data/processed/nyc_tracts.parquet
 
 # Secrets
 .env

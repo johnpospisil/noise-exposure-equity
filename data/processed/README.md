@@ -10,10 +10,12 @@ Small analysis-ready tables. Each one lists its sources. Raw and interim data ar
 | `disparity_income.csv`, `disparity_race.csv` | `make models` (`ne.models.disparity`) | BTS National Transportation Noise Map; Census 2020 blocks (`POP20`); ACS 5-year (B19013 income, B03002 race/ethnicity) via the Census API |
 | `spatial_models_pooled.csv`, `spatial_models_metro.csv`, `spatial_lm_diagnostics.csv` | `make models` (`ne.models.spatial_reg`) | as above, plus TIGER/Line 2020 block groups (contiguity, land area) |
 | `change_over_time.csv` | `ne.models.spatial_reg.change_over_time` | as the disparity tables (BTS 2016–2022, ACS 2016–20 and 2018–22) |
+| `nyc_panel.parquet`, `nyc_tracts.parquet` | `make build` (`ne.build.nyc_panel`) | NYC Open Data 311 (`76ig-c548`, `erm2-nwe9`), tract-level counts only; BTS 2022; Census 2020 blocks and tracts; ACS 5-year 2016–20, 2018–22, 2020–24 (tracts) |
 
 All values come from **modelled noise, not measured noise**. BTS says the map should not be used to judge noise at individual locations. Results describe neighbourhoods, not individuals.
 
 Citations:
+- City of New York, *NYC Open Data: 311 Service Requests*.
 - U.S. Department of Transportation, Bureau of Transportation Statistics, *National Transportation Noise Map*.
 - U.S. Census Bureau, *2020 TIGER/Line Shapefiles* and *2020 Census Redistricting Data (P.L. 94-171)*.
 

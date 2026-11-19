@@ -245,3 +245,42 @@ Built by `ne.build.analysis_table` (`make build`). One row per 2020 block group 
 | `pct_renter`, `pct_under18`, `pct_65plus` | renter households, age shares | ACS B25003, B01001 |
 
 All sources are public domain (BTS, Census). No NHGIS. Modelled noise, not measured; neighbourhood-level only.
+
+## `data/processed/nyc_panel.parquet` and `nyc_tracts.parquet` (P12)
+
+Built by `ne.build.nyc_panel` (`make build`). These files contain only tract-level counts, never complaint records (NYC Open Data terms + project rule).
+
+**Panel:** 2,420,080 rows (1.9 MB) = 2,327 NYC 2020 census tracts × 130 months (2016-01 to 2026-10) × 8 complaint groups. Columns:
+- `complaints`: raw count.
+- `location_days`: one location counted at most once per day per group (decision P05).
+
+Coverage of the 7,013,451 noise complaints in the window:
+- 99.4% have coordinates.
+- All but 464 of those fall inside an NYC tract.
+
+**Tracts:**
+- Borough.
+- `pop20`.
+- Modelled noise from the 2022 BTS map, population-weighted from block groups: `{all,road,aviation,rail}_pct_ge_{55,65}`.
+- ACS 2018–22 demographics, fetched by `ne.build.nyc_panel.fetch_tracts`: income, gross rent, race/ethnicity, renter share.
+- Gentrification `typology`.
+
+**Gentrification typology** (our own; ACS 2016–20 → 2020–24, both on 2020 tracts; city medians over tracts with ≥ 500 residents):
+
+| Class | Rule | Tracts | Residents (2020) |
+|---|---|---|---|
+| Low-income, gentrifying | income ≤ city median, and both the BA+ share gain and the rent growth above the city median | 299 | 1.3 M |
+| Low-income, not gentrifying | income ≤ city median, otherwise | 773 | 3.3 M |
+| Higher-income | income > city median | 1,072 | 4.1 M |
+| Too few residents | < 500 residents or missing data | 183 | — |
+
+**Derived from:**
+- NYC Open Data 311 Service Requests (`76ig-c548`, `erm2-nwe9`).
+- BTS National Transportation Noise Map 2022.
+- Census 2020 blocks and tracts (TIGER/Line).
+- ACS 5-year via the Census API.
+
+**Known issues:**
+- **One Bronx tract (36005042000) holds 396,077 raw complaints but only 2,890 location-days.** Two buildings drive it (P05). With raw counts, the top 1% of tracts hold 17.8% of residential complaints. With location-days they hold 5.7%.
+- BTS rail excludes the NYC subway.
+- 311 helicopter complaints (mostly Manhattan) barely line up with the BTS aviation layer: Spearman ρ = −0.18 against tract aviation exposure. BTS aviation models airport operations, not helicopter routes.
