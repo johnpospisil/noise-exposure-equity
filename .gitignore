@@ -14,6 +14,7 @@ data/processed/*
 !data/processed/nyc_panel.parquet
 !data/processed/nyc_tracts.parquet
 !data/processed/complaints_nb_*.csv
+!data/processed/health_*.csv
 
 # Secrets
 .env

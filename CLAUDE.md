@@ -169,7 +169,7 @@ noise-exposure-equity/
 
 ### Phase 5: Health translation, robustness, maps (Week 5)
 
-- [ ] **P14: WHO health translation and Chart 5.**
+- [x] ✅ DONE! **P14: WHO health translation and Chart 5.** _Done 2026-11-19: extra cases above WHO guideline levels, 20 metros: highly annoyed 2.9M (aircraft), 0.8M (road), 0.7M (rail); highly sleep-disturbed 0.6M (rail), 0.5M (aircraft), 0.2M (road); every source falls hardest on the lowest income fifth; Chart 5 made; 125 tests pass._
   Apply ERFs to BG exposure: estimated highly-annoyed and highly-sleep-disturbed residents by metro and source, with uncertainty ranges from ERF confidence intervals. Chart 5.
   **Deliverables:** estimates table, Chart 5, caveat text block.
   **Questions:** Show ranges or point estimates in the headline numbers?
@@ -221,6 +221,8 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17 (P06): **Health headline = extra cases above the WHO guideline level**; total cases above the curve's lower limit reported alongside (P14).
 - 2026-11-17 (P09): Race/ethnicity groups: NH White, NH Black, Hispanic, NH Asian, other (other races + multiracial). `analysis_bg.parquet` stays local (49.6 MB, rebuilt by `make build`); result tables from P10 on are committed.
 - 2026-11-19 (P13): **NYC section is exploratory.** Main point: gentrifying tracts complain 14% more than other low-income tracts with the same modelled noise and demographics; complaints barely follow modelled noise. Caveats: 311 measures reporting; BTS misses most complaint sources.
+- 2026-11-19 (P14): **Health ranges stay assumption ranges** (band position, conversion offsets ±2 dB); the curves' published confidence intervals are not coded, and the text says so.
+- 2026-11-19 (P15): Robustness set = spec list + alternative gentrification definition (income growth instead of rent), ±2 dB on the rail night offset, 2020 map instead of 2022.
 - 2026-11-19 (P14): Health headline = **point estimates with ranges beside them**, counting extra cases above the WHO guideline levels.
 - 2026-11-19 (P12): **Helicopter complaints are left out of the complaint models** (BTS aviation models airports, not helicopter routes; tract ρ = −0.18); reported descriptively. Models cover residential, street, vehicle and commercial complaints.
 - 2026-11-19 (P12): **Gentrification typology = our own**, ACS 2016–20 → 2020–24 on 2020 tracts (income ≤ city median; BA+ gain and rent growth above the city median). Tract level, not NTA. Panel window 2016-01 → 2026-10. `nyc_panel.parquet` and `nyc_tracts.parquet` are committed (tract-level counts only).

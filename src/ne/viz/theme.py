@@ -50,3 +50,6 @@ TYPOLOGY_COLORS = {
     "Low-income, gentrifying": "#eb6834",
     "Low-income, not gentrifying": "#1baf7a",
 }
+
+#: Noise sources (P14): categorical slots 1-3, fixed order.
+SOURCE_COLORS = {"road": "#2a78d6", "rail": "#eb6834", "aviation": "#1baf7a"}

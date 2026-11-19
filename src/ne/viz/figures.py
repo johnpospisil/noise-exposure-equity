@@ -340,11 +340,61 @@ def chart4(year_span=(2016, 2025)):
     return _save(fig, "chart4_nyc_complaints")
 
 
+def chart5():
+    """Excess highly annoyed / sleep-disturbed residents per 1,000, by metro and source."""
+    from ne.models import health
+
+    d = pd.read_csv(health.OUT)
+    metros = [dp.POOLED] + [m["short"] for m in config.metros()]
+    fig, axes = plt.subplots(1, 2, figsize=(12, 9), sharey=True)
+    titles = {"HA": "Highly annoyed (Lden)", "HSD": "Highly sleep-disturbed (Lnight)"}
+    offsets = {"road": -0.22, "rail": 0.0, "aviation": 0.22}
+    for ax, outcome in zip(axes, ("HA", "HSD"), strict=True):
+        for src, color in theme.SOURCE_COLORS.items():
+            g = d[(d["outcome"] == outcome) & (d["source"] == src)].set_index("metro")
+            g = g.reindex(metros)
+            y = [i + offsets[src] for i in range(len(metros))]
+            ax.hlines(y, g["excess_low_per_1000"], g["excess_high_per_1000"], color=color,
+                      lw=1.5, alpha=0.8)  # fmt: skip
+            ax.plot(g["excess_per_1000"], y, "o", ms=6, color=color, mec=theme.SURFACE,
+                    mew=1, label=src.capitalize())  # fmt: skip
+        ax.axhline(0.5, color=theme.AXIS, lw=0.8)
+        ax.set_title(titles[outcome], loc="left", fontsize=11.5, color=theme.INK)
+        ax.set_xlim(left=0)
+        ax.set_xlabel("Extra cases above the WHO guideline level, per 1,000 residents",
+                      fontsize=9, color=theme.INK_MUTED)  # fmt: skip
+        theme.style_axes(ax, grid_axis="x")
+    axes[0].set_yticks(range(len(metros)), metros)
+    axes[0].invert_yaxis()
+    axes[0].get_yticklabels()[0].set_fontweight("bold")
+    axes[0].legend(frameon=False, fontsize=9, loc="lower right", title_fontsize=8.5,
+                   title="Source (dot = central; line = assumption range)")  # fmt: skip
+    p = d[d["metro"] == dp.POOLED].set_index(["outcome", "source"])
+    ha_av = p.loc[("HA", "aviation")]
+    fig.suptitle(
+        "Aviation noise is the largest source of estimated annoyance; rail matters most at night\n"
+        f"Estimated extra highly annoyed / sleep-disturbed residents, 2022 (20 metros: "
+        f"{ha_av['excess'] / 1e6:.1f}M highly annoyed by aircraft noise)",
+        x=0.03, y=0.99, ha="left", fontsize=12.5, color=theme.INK,
+    )  # fmt: skip
+    fig.text(0.03, 0.012,
+             "Estimates, not counts. WHO 2018 exposure-response curves (Guski et al. 2017; Basner "
+             "& McGuire 2018) applied to modelled LAeq,24h in 5-dB bands, converted to Lden / "
+             "Lnight with assumed offsets.\nRanges vary the level within each band and the "
+             "offsets by ±2 dB; they are not confidence intervals. Sources are not added (people "
+             "can be affected by more than one).\nResidents below 45 dBA are not counted. "
+             + SOURCE_NOTE, fontsize=7.5, color=theme.INK_MUTED)  # fmt: skip
+    fig.subplots_adjust(left=0.13, right=0.98, top=0.9, bottom=0.13, wspace=0.08)
+    return _save(fig, "chart5_health")
+
+
 if __name__ == "__main__":
     figs = [*hero(55), *hero(65), *by_source(55)]
     if (config.PROCESSED_DIR / "spatial_models_metro.csv").exists():
         figs += [*spec_steps(), *metro_models(), *change_box()]
     if (config.PROCESSED_DIR / "complaints_nb_margins.csv").exists():
         figs += chart4()
+    if (config.PROCESSED_DIR / "health_estimates.csv").exists():
+        figs += chart5()
     for p in figs:
         print(p)
