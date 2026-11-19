@@ -11,6 +11,7 @@ Small analysis-ready tables. Each one lists its sources. Raw and interim data ar
 | `spatial_models_pooled.csv`, `spatial_models_metro.csv`, `spatial_lm_diagnostics.csv` | `make models` (`ne.models.spatial_reg`) | as above, plus TIGER/Line 2020 block groups (contiguity, land area) |
 | `change_over_time.csv` | `ne.models.spatial_reg.change_over_time` | as the disparity tables (BTS 2016–2022, ACS 2016–20 and 2018–22) |
 | `nyc_panel.parquet`, `nyc_tracts.parquet` | `make build` (`ne.build.nyc_panel`) | NYC Open Data 311 (`76ig-c548`, `erm2-nwe9`), tract-level counts only; BTS 2022; Census 2020 blocks and tracts; ACS 5-year 2016–20, 2018–22, 2020–24 (tracts) |
+| `complaints_nb_models.csv`, `complaints_nb_margins.csv` | `make models` (`ne.models.complaints_nb`) | as `nyc_panel.parquet` / `nyc_tracts.parquet` |
 
 All values come from **modelled noise, not measured noise**. BTS says the map should not be used to judge noise at individual locations. Results describe neighbourhoods, not individuals.
 

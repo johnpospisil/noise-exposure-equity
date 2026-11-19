@@ -263,9 +263,88 @@ def change_box(t: int = 55):
     return _save(fig, f"change_box_ge{t}")
 
 
+NYC_CAVEAT = (
+    "311 complaints measure reporting, not noise. Modelled noise (BTS 2022) covers major roads, "
+    "rail (no subway) and airports, not neighbours, bars or construction.\n"
+    "Tracts with at least 500 residents, 2016-2025. Associations between tracts, not individual "
+    "behaviour. Sources: NYC Open Data 311; BTS; U.S. Census Bureau (2020 Census, ACS)."
+)
+
+
+def chart4(year_span=(2016, 2025)):
+    """NYC: complaints per 1,000 residents vs modelled noise, by gentrification typology."""
+    import numpy as np
+
+    from ne.build import nyc_panel as npn
+    from ne.models import complaints_nb as cnb
+
+    p = pd.read_parquet(npn.PANEL)
+    t = pd.read_parquet(npn.TRACTS)
+    p = p[p["noise_group"].isin(cnb.MODEL_GROUPS) & p["month"].dt.year.between(*year_span)]
+    years = year_span[1] - year_span[0] + 1
+    rate = p.groupby("tract")["location_days"].sum() / years
+    t = t.set_index("tract").join(rate.rename("ld"))
+    t = t[(t["pop20"] >= npn.MIN_POP) & t["typology"].isin(theme.TYPOLOGY_COLORS)]
+    t["per_1000"] = t["ld"] / t["pop20"] * 1000
+    m = pd.read_csv(cnb.MARGINS)
+    tab = pd.read_csv(cnb.OUT)
+    c = tab[(tab["group"] == "combined") & (tab["variant"].str.startswith("ref"))
+            & (tab["term"] == "Low-income, gentrifying")].iloc[0]  # fmt: skip
+
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(12.5, 5.6), gridspec_kw={"wspace": 0.28})
+    for typ, color in theme.TYPOLOGY_COLORS.items():
+        d = t[t["typology"] == typ]
+        a1.scatter(d["all_pct_ge_55"], d["per_1000"].clip(lower=1), s=9, color=color,
+                   alpha=0.55, lw=0, label=f"{typ} ({len(d):,} tracts)")  # fmt: skip
+    a1.set_yscale("log")
+    a1.set_xlabel("Modelled noise: % of residents ≥ 55 dBA (2022)", fontsize=9.5,
+                  color=theme.INK_MUTED)  # fmt: skip
+    a1.set_ylabel("Complaint location-days per 1,000 residents per year (log)", fontsize=9.5,
+                  color=theme.INK_MUTED)  # fmt: skip
+    a1.set_title("Each dot is a census tract", loc="left", fontsize=11, color=theme.INK)
+    a1.legend(frameon=False, fontsize=8.5, loc="lower right", markerscale=2)
+    theme.style_axes(a1, grid_axis="both")
+
+    ends = {}
+    for typ, color in theme.TYPOLOGY_COLORS.items():
+        g = m[m["typology"] == typ]
+        a2.fill_between(g["pct_ge_55"], g["lo"], g["hi"], color=color, alpha=0.15, lw=0)
+        a2.plot(g["pct_ge_55"], g["rate"], color=color, lw=2)
+        ends[typ] = g.iloc[-1]["rate"]
+    # direct labels at the line ends, nudged apart so they never overlap
+    ys, gap = {}, 2.4
+    for typ, y in sorted(ends.items(), key=lambda kv: kv[1]):
+        prev = max(ys.values(), default=-np.inf)
+        ys[typ] = max(y, prev + gap)
+    for typ, y in ys.items():
+        a2.text(81.5, y, typ, va="center", fontsize=8.5, color=theme.INK)
+    a2.set_xlim(0, 80)
+    a2.set_ylim(bottom=0)
+    a2.set_xlabel("Modelled noise: % of residents ≥ 55 dBA (2022)", fontsize=9.5,
+                  color=theme.INK_MUTED)  # fmt: skip
+    a2.set_ylabel("Predicted location-days per 1,000 residents per year", fontsize=9.5,
+                  color=theme.INK_MUTED)  # fmt: skip
+    a2.set_title("Model prediction, same demographics (95% band)", loc="left", fontsize=11,
+                 color=theme.INK)  # fmt: skip
+    theme.style_axes(a2)
+    a2.set_xticks(range(0, 81, 20))
+
+    fig.suptitle(
+        "In NYC, complaints barely follow modelled transportation noise; gentrifying tracts "
+        f"complain {100 * (c['irr'] - 1):.0f}% more\nthan other low-income tracts with the "
+        "same modelled noise and demographics (residential, street, vehicle and commercial)",
+        x=0.03, y=0.99, ha="left", fontsize=12.5, color=theme.INK,
+    )  # fmt: skip
+    fig.text(0.03, 0.015, NYC_CAVEAT, fontsize=7.5, color=theme.INK_MUTED)
+    fig.subplots_adjust(left=0.07, right=0.84, top=0.83, bottom=0.2)
+    return _save(fig, "chart4_nyc_complaints")
+
+
 if __name__ == "__main__":
     figs = [*hero(55), *hero(65), *by_source(55)]
     if (config.PROCESSED_DIR / "spatial_models_metro.csv").exists():
         figs += [*spec_steps(), *metro_models(), *change_box()]
+    if (config.PROCESSED_DIR / "complaints_nb_margins.csv").exists():
+        figs += chart4()
     for p in figs:
         print(p)

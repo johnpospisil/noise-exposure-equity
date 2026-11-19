@@ -13,6 +13,7 @@ data/processed/*
 !data/processed/change_over_time.csv
 !data/processed/nyc_panel.parquet
 !data/processed/nyc_tracts.parquet
+!data/processed/complaints_nb_*.csv
 
 # Secrets
 .env

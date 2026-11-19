@@ -162,7 +162,7 @@ noise-exposure-equity/
   **Deliverables:** `data/processed/nyc_panel.parquet`, summary of complaints per 1,000 residents by typology, panel QA.
   **Questions:** Which gentrification typology (Urban Displacement Project, Furman Center, or our own ACS-change definition)? Tract or NTA level?
 
-- [ ] **P13: Negative binomial models and Chart 4.**
+- [x] ✅ DONE! **P13: Negative binomial models and Chart 4.** _Done 2026-11-19: complaints barely track modelled noise (rate ratio 0.99 per 10 points); gentrifying tracts file 14% more complaints than other low-income tracts with the same noise and demographics (CI 6–23%; residential +13%, street +25%); Chart 4 made; 121 tests pass._
   `models/complaints_nb.py`: NB models of complaints on modelled noise × gentrification, demographics, log population offset, borough FE; separate models by complaint type; cluster-robust SEs. Chart 4: complaints per 1,000 residents vs modelled noise, coloured by typology.
   **Deliverables:** model tables, marginal-effects plot, Chart 4, plain-English statement of the key coefficient.
   **Questions:** Is the result strong enough to lead the NYC section, or should it be framed as exploratory?
@@ -220,6 +220,8 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17 (P06): **Metric offsets**: road and aviation Lden = LAeq24 + 3, Lnight = LAeq24 − 7; rail +5 / −2 (freight runs at night). Assumptions, tested in P15.
 - 2026-11-17 (P06): **Health headline = extra cases above the WHO guideline level**; total cases above the curve's lower limit reported alongside (P14).
 - 2026-11-17 (P09): Race/ethnicity groups: NH White, NH Black, Hispanic, NH Asian, other (other races + multiracial). `analysis_bg.parquet` stays local (49.6 MB, rebuilt by `make build`); result tables from P10 on are committed.
+- 2026-11-19 (P13): **NYC section is exploratory.** Main point: gentrifying tracts complain 14% more than other low-income tracts with the same modelled noise and demographics; complaints barely follow modelled noise. Caveats: 311 measures reporting; BTS misses most complaint sources.
+- 2026-11-19 (P14): Health headline = **point estimates with ranges beside them**, counting extra cases above the WHO guideline levels.
 - 2026-11-19 (P12): **Helicopter complaints are left out of the complaint models** (BTS aviation models airports, not helicopter routes; tract ρ = −0.18); reported descriptively. Models cover residential, street, vehicle and commercial complaints.
 - 2026-11-19 (P12): **Gentrification typology = our own**, ACS 2016–20 → 2020–24 on 2020 tracts (income ≤ city median; BA+ gain and rent growth above the city median). Tract level, not NTA. Panel window 2016-01 → 2026-10. `nyc_panel.parquet` and `nyc_tracts.parquet` are committed (tract-level counts only).
 - 2026-11-17 (P11): **Framing**: lead with the descriptive income and race gaps (P10); present renting and density as part of how the gap arises, not as something that cancels it.

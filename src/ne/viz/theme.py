@@ -41,3 +41,12 @@ def style_axes(ax, grid_axis: str = "y") -> None:
     ax.grid(axis=grid_axis, color=GRID, lw=0.6)
     ax.set_axisbelow(True)
     ax.tick_params(colors=INK_MUTED, labelsize=9)
+
+
+#: NYC gentrification typology (P13): categorical slots 1-3, fixed order (validated:
+#: all checks pass; aqua needs direct labels for contrast).
+TYPOLOGY_COLORS = {
+    "Higher-income": "#2a78d6",
+    "Low-income, gentrifying": "#eb6834",
+    "Low-income, not gentrifying": "#1baf7a",
+}
