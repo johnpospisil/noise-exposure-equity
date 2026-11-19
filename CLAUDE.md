@@ -186,7 +186,7 @@ noise-exposure-equity/
 
 ### Phase 6: Article, app, publish (Week 6)
 
-- [ ] **P17: Report / article.**
+- [x] ✅ DONE! **P17: Report / article.** _Done 2026-11-19: Quarto article (about 1,400 words of main text, 2,200 with appendix) built from result tables; all 70 numbers are variables from `ne.report`, traced in `report/claims.csv`; self-contained HTML (5.5 MB); 136 tests pass._
   `report/index.qmd`: Quarto article built from processed data and figures; methods appendix; limitations ("what we won't claim"); data sources and citations section (NHGIS citation in its required form); reproducibility instructions (including getting your own NHGIS account). `make report`.
   **Deliverables:** rendered HTML report, word count, list of claims with the table/figure behind each one.
   **Questions:** Where will it be published (personal site, Medium, Substack, GitHub Pages)? Audience and tone?
@@ -222,6 +222,8 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17 (P09): Race/ethnicity groups: NH White, NH Black, Hispanic, NH Asian, other (other races + multiracial). `analysis_bg.parquet` stays local (49.6 MB, rebuilt by `make build`); result tables from P10 on are committed.
 - 2026-11-19 (P13): **NYC section is exploratory.** Main point: gentrifying tracts complain 14% more than other low-income tracts with the same modelled noise and demographics; complaints barely follow modelled noise. Caveats: 311 measures reporting; BTS misses most complaint sources.
 - 2026-11-19 (P14): **Health ranges stay assumption ranges** (band position, conversion offsets ±2 dB); the curves' published confidence intervals are not coded, and the text says so.
+- 2026-11-19 (P17): Report is published on **GitHub Pages**; general-interest data-journalism tone, methods in an appendix.
+- 2026-11-19 (P18): App = **static site on GitHub Pages**: Census Geocoder → 2020 block group → precomputed block-group lookup (20 metros only), with the "modelled, not measured" warning. No server.
 - 2026-11-19 (P15): Aircraft health headline is worded **"at least 2.9 million"** (the WHO aircraft guideline sits below the map's 45 dBA floor; methods explain why).
 - 2026-11-19 (P16): Bivariate map features **New York** with **income**. Interactive version is a hand-written **Leaflet** page (template in `src/ne/viz/templates/`), not plotly: plotly 7.1's MapLibre maps rendered a blank canvas in Chrome. Basemap: Esri World Light Gray (no key; CARTO now needs an API key). Adding `folium` was blocked, so no new dependency.
 - 2026-11-19 (P15): Robustness set = spec list + alternative gentrification definition (income growth instead of rent), ±2 dB on the rail night offset, 2020 map instead of 2022.

@@ -6,7 +6,7 @@ Draft wording for the report. 2022 BTS map (road + rail + aviation), 20 largest 
 
 - In all 20 metros, the lowest-income fifth of neighbourhoods has a larger share of residents at ≥ 55 dBA than the highest-income fifth. Pooled across metros: **15.2% vs 6.5%**. At the stricter ≥ 65 dBA threshold: 1.8% vs 0.9%.
 - Every source shows the same income gradient. The ratio is steepest for aviation (3.5×) and rail (3.4×), and flatter for major roads (1.7×).
-- At ≥ 55 dBA, 12–13% of Black, Hispanic and Asian residents live in blocks at or above the threshold, against 8.3% of White residents (pooled; partly reflects which metros each group lives in).
+- At ≥ 55 dBA, 12–13% of Black, Hispanic and Asian residents live in blocks at or above the threshold, against 8.2% of White residents (pooled; partly reflects which metros each group lives in).
 
 ## Models (P11)
 

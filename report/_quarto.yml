@@ -1,0 +1,17 @@
+project:
+  type: default
+  output-dir: _output
+
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc-depth: 2
+    toc-location: left
+    number-sections: false
+    fig-cap-location: bottom
+    link-external-newwindow: true
+    theme: cosmo
+    mainfont: "Inter, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontsize: "1.0em"
+    max-width: "780px"

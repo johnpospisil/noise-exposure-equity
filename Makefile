@@ -32,7 +32,8 @@ figures:  ## Make all charts (P10-P16)
 	$(PY) ne.viz.maps
 
 report:  ## Render the Quarto report (P17)
-	@echo "TODO (P17): quarto render report"
+	$(PY) ne.report
+	quarto render report
 
 test:  ## Run tests
 	uv run pytest -q
