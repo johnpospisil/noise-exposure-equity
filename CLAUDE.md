@@ -167,7 +167,7 @@ noise-exposure-equity/
   **Deliverables:** model tables, marginal-effects plot, Chart 4, plain-English statement of the key coefficient.
   **Questions:** Is the result strong enough to lead the NYC section, or should it be framed as exploratory?
 
-### Phase 5: Health translation, robustness, maps (Week 5)
+### Phase 5: Health translation, robustness, maps (Week 5) ✅ DONE
 
 - [x] ✅ DONE! **P14: WHO health translation and Chart 5.** _Done 2026-11-19: extra cases above WHO guideline levels, 20 metros: highly annoyed 2.9M (aircraft), 0.8M (road), 0.7M (rail); highly sleep-disturbed 0.6M (rail), 0.5M (aircraft), 0.2M (road); every source falls hardest on the lowest income fifth; Chart 5 made; 125 tests pass._
   Apply ERFs to BG exposure: estimated highly-annoyed and highly-sleep-disturbed residents by metro and source, with uncertainty ranges from ERF confidence intervals. Chart 5.
@@ -179,7 +179,7 @@ noise-exposure-equity/
   **Deliverables:** robustness grid, list of any results that change sign or significance.
   **Questions:** Any robustness checks to add or drop?
 
-- [ ] **P16: Bivariate choropleth (Chart 2).**
+- [x] ✅ DONE! **P16: Bivariate choropleth (Chart 2).** _Done 2026-11-19: New York noise × income bivariate map, static PNG/SVG (polygons rasterized, 1.8 MB) and interactive Leaflet page (Esri light-grey basemap, hover details, 2.3 MB; plotly's MapLibre maps drew blank); 19% of residents shown live in loud, lower-income block groups; 134 tests pass._
   `viz/maps.py`: noise × income (or % minority) bivariate map for one metro, static PNG/SVG plus an interactive version.
   **Deliverables:** Chart 2 (static + interactive HTML).
   **Questions:** Which metro to feature? Income or race as the second variable?
@@ -223,7 +223,7 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-19 (P13): **NYC section is exploratory.** Main point: gentrifying tracts complain 14% more than other low-income tracts with the same modelled noise and demographics; complaints barely follow modelled noise. Caveats: 311 measures reporting; BTS misses most complaint sources.
 - 2026-11-19 (P14): **Health ranges stay assumption ranges** (band position, conversion offsets ±2 dB); the curves' published confidence intervals are not coded, and the text says so.
 - 2026-11-19 (P15): Aircraft health headline is worded **"at least 2.9 million"** (the WHO aircraft guideline sits below the map's 45 dBA floor; methods explain why).
-- 2026-11-19 (P16): Bivariate map features **New York** with **income**.
+- 2026-11-19 (P16): Bivariate map features **New York** with **income**. Interactive version is a hand-written **Leaflet** page (template in `src/ne/viz/templates/`), not plotly: plotly 7.1's MapLibre maps rendered a blank canvas in Chrome. Basemap: Esri World Light Gray (no key; CARTO now needs an API key). Adding `folium` was blocked, so no new dependency.
 - 2026-11-19 (P15): Robustness set = spec list + alternative gentrification definition (income growth instead of rent), ±2 dB on the rail night offset, 2020 map instead of 2022.
 - 2026-11-19 (P14): Health headline = **point estimates with ranges beside them**, counting extra cases above the WHO guideline levels.
 - 2026-11-19 (P12): **Helicopter complaints are left out of the complaint models** (BTS aviation models airports, not helicopter routes; tract ρ = −0.18); reported descriptively. Models cover residential, street, vehicle and commercial complaints.

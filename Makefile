@@ -29,7 +29,7 @@ models:  ## Disparity, spatial and complaint models (P10-P15)
 figures:  ## Make all charts (P10-P16)
 	$(PY) ne.viz.qa
 	$(PY) ne.viz.figures
-	@echo "TODO (P11-P16): more charts and maps"
+	$(PY) ne.viz.maps
 
 report:  ## Render the Quarto report (P17)
 	@echo "TODO (P17): quarto render report"
