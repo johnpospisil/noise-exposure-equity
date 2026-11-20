@@ -1,6 +1,7 @@
 .PHONY: help setup ingest build models figures report app site test lint all clean-interim
 
 PY := uv run python -m
+PYQ := uv run python -W ignore -m  # quiet: spreg/statsmodels warnings
 
 help:  ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -21,10 +22,10 @@ build:  ## Zonal stats and analysis tables (P06-P09, P12)
 
 models:  ## Disparity, spatial and complaint models (P10-P15)
 	$(PY) ne.models.disparity
-	$(PY) -W ignore ne.models.spatial_reg
-	$(PY) -W ignore ne.models.complaints_nb
+	$(PYQ) ne.models.spatial_reg
+	$(PYQ) ne.models.complaints_nb
 	$(PY) ne.models.health
-	$(PY) -W ignore ne.models.robustness
+	$(PYQ) ne.models.robustness
 
 figures:  ## Make all charts (P10-P16)
 	$(PY) ne.viz.qa
@@ -34,7 +35,7 @@ figures:  ## Make all charts (P10-P16)
 app:  ## Build the address-lookup app data (P18)
 	$(PY) ne.build.app_data
 
-site: report app  ## Assemble the GitHub Pages site in _site/ (P18-P19)
+site: report  ## Assemble the GitHub Pages site in _site/ (uses committed app/data)
 	rm -rf _site && mkdir -p _site/report _site/app _site/map
 	cp report/_output/index.html _site/report/index.html
 	cp -R app/index.html app/app.js app/style.css app/data _site/app/
@@ -52,4 +53,4 @@ lint:  ## Lint and format check
 	uv run ruff check src tests
 	uv run ruff format --check src tests
 
-all: ingest build models figures report  ## Full pipeline
+all: ingest build models figures report app  ## Full pipeline

@@ -8,9 +8,9 @@ One section per source: URL, retrieval date, version, size, licence, citation an
 | ACS 5-year (Census API) | Public domain | ✅ |
 | 2020 Decennial block population (TIGER `POP20`) | Public domain | ✅ |
 | TIGER/Line + CBSA delineations | Public domain | ✅ |
-| IPUMS NHGIS crosswalks | **IPUMS NHGIS terms: no redistribution; citation required** | ✅ (login required, as expected); possibly not needed (see §5) |
+| IPUMS NHGIS crosswalks | **IPUMS NHGIS terms: no redistribution; citation required** | **Not used** (decision P02; see §5) |
 | NYC 311 noise complaints | NYC Open Data terms of use | ✅ |
-| NYC gentrification typology | TBD | Deferred to P12 |
+| NYC gentrification typology | Our own, from ACS (public domain) | ✅ Built in P12 (see §7) |
 | FAA Part 150 noise contours | Public | ⚠️ Mostly PDF maps, few GIS files |
 | WHO / journal exposure-response functions | Published papers; cite | ✅ |
 | EPA EJScreen | — | Skipped (decision 2026-11-17) |
@@ -128,7 +128,7 @@ CBSA delineation file (county → CBSA): `…/metro-micro/geographies/reference-
 
   > Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0
 
-- **May not be needed:** because ACS 2016–2020 is already on 2020 block groups (§2), it can stand in for 2014–18 as the "earlier" demographic snapshot with no crosswalk. Decision pending (P02 question).
+- **Not used (decision 2026-11-17, P02):** ACS 2016–2020 is already on 2020 block groups (§2) and stands in for 2014–18 as the earlier demographic snapshot, so no crosswalk is needed. No NHGIS file was downloaded, committed or published, so no NHGIS citation or bibliography submission applies. The terms above are kept in case this is revisited.
 
 ## 6. NYC 311 noise complaints
 
@@ -154,7 +154,7 @@ CBSA delineation file (county → CBSA): `…/metro-micro/geographies/reference-
 
 ## 7. NYC gentrification typology
 
-Deferred to P12. Candidates: Urban Displacement Project (tract typology), NYU Furman Center, or our own ACS-change typology. Licence to be checked then.
+Our own ACS-change typology (decision P12), built by `ne.build.nyc_panel.typology` on 2020 tracts from ACS 5-year 2016–20 and 2020–24 (Census API, public domain). A tract is *low-income* if its 2016–20 median household income is at or below the city median; a low-income tract is *gentrifying* if both its gain in the BA+ share and its rent growth are above the city median. Robustness: income growth instead of rent growth (P15). No third-party typology is used, so no extra licence applies.
 
 ## 8. FAA Part 150 noise contours
 

@@ -180,6 +180,7 @@ def build_cbsa(metros: list[dict]):
     g = gpd.read_file(f"zip://{z}")
     g = g[g["GEOID"].isin([m["cbsa"] for m in metros])][["GEOID", "NAME", "geometry"]]
     g = g.rename(columns={"GEOID": "cbsa", "NAME": "name"})
+    OUT.mkdir(parents=True, exist_ok=True)
     g.to_parquet(OUT / "cbsa_2020.parquet")
     return g
 

@@ -170,6 +170,25 @@ def test_pooled_shares_weight_block_groups_by_population():
     assert out.loc[(2022, "road"), 55] == pytest.approx(10.0)
 
 
+def test_summaries_write_metro_and_benchmark_tables(tmp_path):
+    # found in P19: these committed tables had no code path in `make all`
+    rows = []
+    for year, source in [(2016, "aviation"), (2016, "road"), (2020, "all")]:
+        for cbsa, share in [("35620", 0.5), ("12060", 0.1)]:
+            rows.append({"cbsa": cbsa, "year": year, "source": source, "pop20": 100,
+                         **{f"pop_share_ge_{t}": share for t in zs.THRESHOLDS}})  # fmt: skip
+    metro, rec = zs.summaries(pd.DataFrame(rows), out_dir=tmp_path)
+
+    assert (tmp_path / "metro_exposure.csv").exists()
+    assert (tmp_path / "bts_reconciliation.csv").exists()
+    assert metro["cbsa"].tolist()[:2] == ["12060", "12060"]  # sorted by cbsa, year, source
+    assert metro.loc[metro["cbsa"] == "35620", "pct_ge_55"].eq(50.0).all()
+    assert metro["metro"].iloc[0] == "Atlanta"
+    assert len(rec) == len(zs.BENCHMARKS)
+    assert rec["our_20_metros_pct"].eq(30.0).all()
+    assert metro["derived_from"].notna().all() and rec["derived_from"].notna().all()
+
+
 # --- real output ----------------------------------------------------------------------
 
 

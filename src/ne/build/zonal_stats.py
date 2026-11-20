@@ -414,6 +414,25 @@ def reconcile(bg: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+DERIVED_FROM = "BTS National Transportation Noise Map; 2020 Census blocks (TIGER POP20)"
+
+
+def summaries(bg: pd.DataFrame, out_dir: Path = config.PROCESSED_DIR):
+    """Write ``metro_exposure.csv`` (shares by metro, year and source) and
+    ``bts_reconciliation.csv`` (pooled shares against published benchmarks)."""
+    names = {m["cbsa"]: m["short"] for m in config.metros()}
+    m = pooled_shares(bg, by=("cbsa", "year", "source")).round(2)
+    m.columns = [f"pct_ge_{t}" for t in m.columns]
+    m = m.reset_index().sort_values(["cbsa", "year", "source"], ignore_index=True)
+    m.insert(1, "metro", m["cbsa"].map(names))
+    m["derived_from"] = DERIVED_FROM
+    rec = reconcile(bg).assign(derived_from=DERIVED_FROM)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    m.to_csv(out_dir / "metro_exposure.csv", index=False)
+    rec.to_csv(out_dir / "bts_reconciliation.csv", index=False)
+    return m, rec
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--metro", help="one CBSA code (default: every metro)")
@@ -426,6 +445,8 @@ def main(argv=None):
     else:
         bg = run_all(a.workers, a.overwrite, a.years)
         print(f"{PROCESSED.relative_to(config.ROOT)}: {len(bg):,} rows")
+        _, rec = summaries(bg)
+        print(rec.drop(columns="derived_from").to_string(index=False))
 
 
 if __name__ == "__main__":
