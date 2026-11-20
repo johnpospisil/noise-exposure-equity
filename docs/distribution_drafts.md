@@ -3,7 +3,7 @@
 Drafts only; nothing here has been sent or posted. Audiences come from spec §9. Every number
 below is in `tests/test_headline_pinned.py`; if that test changes, re-check these drafts.
 
-Links (live once GitHub Pages is on):
+Links (live since 2026-11-19):
 
 - Article: https://johnpospisil.github.io/noise-exposure-equity/report/
 - Lookup: https://johnpospisil.github.io/noise-exposure-equity/app/
@@ -11,9 +11,12 @@ Links (live once GitHub Pages is on):
 
 ## Checklist
 
-- [ ] GitHub Pages enabled (Settings → Pages → Source: GitHub Actions); workflow run green
-- [ ] Article, lookup and map open on phone and desktop from the public URLs
-- [ ] Release `v1.0` tagged
+Recommended order: r/urbanplanning and one or two metro reporters first; r/nyc and NYC Council once the first feedback is in; ASA any time.
+
+
+- [x] GitHub Pages enabled (Settings → Pages → Source: GitHub Actions); workflow run green
+- [x] Article, lookup and map open on phone and desktop from the public URLs
+- [x] Release `v1.0` tagged
 - [ ] r/urbanplanning post
 - [ ] r/nyc post (NYC angle: complaints vs noise)
 - [ ] Two or three city/metro reporters who cover noise, transit or housing

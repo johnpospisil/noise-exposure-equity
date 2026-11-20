@@ -184,7 +184,7 @@ noise-exposure-equity/
   **Deliverables:** Chart 2 (static + interactive HTML).
   **Questions:** Which metro to feature? Income or race as the second variable?
 
-### Phase 6: Article, app, publish (Week 6)
+### Phase 6: Article, app, publish (Week 6) ✅ DONE
 
 - [x] ✅ DONE! **P17: Report / article.** _Done 2026-11-19: Quarto article (about 1,400 words of main text, 2,200 with appendix) built from result tables; all 70 numbers are variables from `ne.report`, traced in `report/claims.csv`; self-contained HTML (5.5 MB); 136 tests pass._
   `report/index.qmd`: Quarto article built from processed data and figures; methods appendix; limitations ("what we won't claim"); data sources and citations section (NHGIS citation in its required form); reproducibility instructions (including getting your own NHGIS account). `make report`.
@@ -196,7 +196,7 @@ noise-exposure-equity/
   **Deliverables:** working local app, screenshots, deployment plan.
   **Questions:** Framework and hosting (static site + pre-computed tiles vs Streamlit / FastAPI)? Metros covered only, or national?
 
-- [ ] **P19: Final QA and publish.**
+- [x] ✅ DONE! **P19: Final QA and publish.** _Done 2026-11-19: clean-clone `make all` (≈2 h) rebuilt every committed output byte-for-byte after fixing 3 fresh-clone bugs; 29 headline numbers pinned; licence audit clean (no NHGIS, no raw data, tract-level 311 only); site live on GitHub Pages via Actions; README, QA checklist and distribution drafts; tagged v1.0; 171 tests pass._
   Run `make all` from a clean clone; validate key numbers (spot checks, a pinned-share test); README with headline findings; DATA.md citations; **licence audit** (no NHGIS files or crosswalk weights in git history, releases or the app; every published table names its sources; NHGIS citation in README, report and DATA.md); tag a release; **submit the article to the NHGIS bibliography**; distribution checklist (spec §9).
   **Deliverables:** clean-build log, QA checklist, release tag, distribution drafts.
   **Questions:** Ready to publish? Who to contact first?
@@ -222,6 +222,7 @@ _Record answers to the questions above here as they are made (date: decision)._
 - 2026-11-17 (P09): Race/ethnicity groups: NH White, NH Black, Hispanic, NH Asian, other (other races + multiracial). `analysis_bg.parquet` stays local (49.6 MB, rebuilt by `make build`); result tables from P10 on are committed.
 - 2026-11-19 (P13): **NYC section is exploratory.** Main point: gentrifying tracts complain 14% more than other low-income tracts with the same modelled noise and demographics; complaints barely follow modelled noise. Caveats: 311 measures reporting; BTS misses most complaint sources.
 - 2026-11-19 (P14): **Health ranges stay assumption ranges** (band position, conversion offsets ±2 dB); the curves' published confidence intervals are not coded, and the text says so.
+- 2026-11-19 (P19): Clean-clone check reused the existing raw downloads (BTS and TIGER zips symlinked; ACS cache and 311 months copied) and rebuilt everything else from scratch. Site published at https://johnpospisil.github.io/noise-exposure-equity/ by `.github/workflows/pages.yml` (builds from committed tables; no raw data in CI). Release `v1.0`. **Distribution order:** r/urbanplanning and one or two metro reporters first; r/nyc and NYC Council after the first feedback; ASA Noise committee any time. No NHGIS bibliography submission (NHGIS not used).
 - 2026-11-19 (P17): Report is published on **GitHub Pages**; general-interest data-journalism tone, methods in an appendix.
 - 2026-11-19 (P18): App = **static site on GitHub Pages**: Census Geocoder → 2020 block group → precomputed block-group lookup (20 metros only), with the "modelled, not measured" warning. No server.
 - 2026-11-19 (P15): Aircraft health headline is worded **"at least 2.9 million"** (the WHO aircraft guideline sits below the map's 45 dBA floor; methods explain why).

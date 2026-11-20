@@ -65,8 +65,8 @@ The 311 step re-downloaded the unsettled months (2026-09 to 2026-11). The NYC pa
 - `uv run pytest -q`: 171 passed.
 - `make lint`: clean.
 
-## Still to do (needs the owner)
+## Publish
 
-- [ ] Enable GitHub Pages (Settings → Pages → Source: GitHub Actions); confirm the first workflow run.
-- [ ] Tag the release `v1.0`.
+- [x] GitHub Pages enabled; first workflow run green (build 32 s, deploy 11 s); live lookups tested.
+- [x] Release `v1.0` tagged.
 - [ ] Distribution: see `docs/distribution_drafts.md`.
